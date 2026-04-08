@@ -86,7 +86,7 @@ st.markdown("""
         margin-bottom: 0.5rem;
     }
     </style>
-    """, unsafe_allow_stdio=True, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # --- Sidebar Content ---
 with st.sidebar:
