@@ -31,9 +31,9 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
         "input": {
             "image": image_url,
             "prompt": f"Professional interior design, {design_prompt}, high quality, realistic, 8k, architectural photography",
-            "negative_prompt": "low quality, blurry, distorted, messy, bad proportions, changed room structure, moved walls",
+            "negative_prompt": "low quality, blurry, distorted, messy, bad proportions, changed room structure, moved walls, changed window position, changed door position, changed floor layout",
             "num_inference_steps": 30,
-            "controlnet_conditioning_scale": 0.8, # บังคับให้ตามโครงสร้างเดิมสูง
+            "controlnet_conditioning_scale": 0.95, # ปรับให้สูงขึ้นมาก (0.95) เพื่อบังคับให้ตามโครงสร้างเดิมเป๊ะๆ
             "guidance_scale": 7.5
         }
     }
@@ -107,11 +107,9 @@ def recommend_furniture_and_palette(design_prompt: str) -> str:
                 return response.text
         except Exception as e:
             print(f"Gemini Error: {e}")
-            # ถ้า Gemini ล้มเหลว (เช่น 403) จะไปใช้ Pollinations ต่อด้านล่าง
 
     # Fallback: ใช้ Pollinations.ai (Text API)
     try:
-        # Pollinations.ai มี endpoint สำหรับ text generation ผ่าน GET request
         encoded_prompt = urllib.parse.quote(prompt_text)
         url = f"https://text.pollinations.ai/{encoded_prompt}"
         res = requests.get(url, timeout=15)

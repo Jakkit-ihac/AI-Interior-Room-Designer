@@ -3,40 +3,42 @@ import json
 
 def build_design_prompt(
     room_type: str,
-    current_furniture: list,
-    free_space: str,
-    wall_color: str,
-    natural_light_direction: str,
     interior_style: str,
-    custom_prompt: str = None
+    furniture_list: list,
+    wall_info: str,
+    lighting_info: str,
+    detailed_narrative: str
 ) -> str:
     """
-    สร้าง prompt สำหรับ AI เพื่อสร้างการออกแบบห้องใหม่ โดยเน้นการรักษาเค้าโครงเดิม (Spatial Layout)
+    สร้าง prompt สำหรับ AI เพื่อเน้นการเปลี่ยนเฟอร์นิเจอร์และเพิ่มของตกแต่ง (Interior Styling)
+    โดยรักษาโครงสร้างห้องเดิม (ผนัง พื้น เพดาน ประตู หน้าต่าง) ไว้ 100%
     """
-    # สร้างรายละเอียดของเฟอร์นิเจอร์เดิมและตำแหน่ง (ถ้ามีข้อมูล)
-    furniture_desc = ", ".join(current_furniture) if current_furniture else "basic furniture"
     
-    # สร้าง Prompt ที่เน้นการรีโนเวท (Renovation-focused Prompt)
-    # เน้นคำว่า "Renovation" และ "In-place decoration" เพื่อให้ AI ไม่วาดห้องใหม่ทั้งหมด
-    base_prompt = f"Interior design renovation of an existing {room_type} into {interior_style} style. "
-    base_prompt += f"STRICTLY MAINTAIN the original room's architecture, door/window positions, and floor layout. "
-    base_prompt += f"The current setup has {furniture_desc}. "
-    base_prompt += f"TASK: Only change the wall colors from {wall_color} to {interior_style} palette, and add decorative elements like plants or art in the existing spaces. "
-    base_prompt += f"Keep all existing furniture in their exact current positions but re-style their surfaces. "
-    base_prompt += f"Preserve the natural light coming from {natural_light_direction}. "
-    base_prompt += "Realistic photo, high quality, 8k, architectural photography, soft cinematic lighting."
+    # สร้างรายละเอียดของเฟอร์นิเจอร์เดิมและตำแหน่ง
+    furniture_desc = ", ".join(furniture_list) if furniture_list else "basic furniture"
+    
+    # สร้าง Prompt ที่เน้นการตกแต่ง (Styling-focused Prompt)
+    # เน้นย้ำเรื่องการรักษาโครงสร้างเดิม (Structural Integrity)
+    base_prompt = f"Professional interior styling and decoration of an existing {room_type} into {interior_style} style. "
+    base_prompt += "STRICTLY PRESERVE the original room's architecture: DO NOT move or change walls, windows, doors, floor, or ceiling. "
+    base_prompt += f"The current room layout is: {detailed_narrative}. "
+    base_prompt += f"Current furniture and positions: {furniture_desc}. "
+    
+    # คำสั่งหลัก: เปลี่ยนเฟอร์นิเจอร์และเพิ่มของตกแต่ง
+    base_prompt += f"TASK: Replace existing furniture with new {interior_style} style pieces in the SAME POSITIONS. "
+    base_prompt += "ADD decorative elements: wall art, indoor plants, stylish rugs, and decorative lighting fixtures to enhance the space. "
+    base_prompt += f"Update the color palette and textures to match {interior_style} while keeping the room's geometry identical. "
+    
+    # รายละเอียดแสงและคุณภาพของภาพ
+    base_prompt += f"Maintain the natural light from {lighting_info}. "
+    base_prompt += "High-end architectural photography, realistic textures, 8k resolution, cinematic lighting, professional interior design portfolio style."
 
-    if custom_prompt:
-        base_prompt += f" Additional requirements: {custom_prompt}"
-        
     return base_prompt
 
 def parse_ai_explanation(explanation_text: str) -> dict:
     """
     แยกวิเคราะห์ข้อความอธิบายจาก AI เพื่อดึงข้อมูลเฟอร์นิเจอร์, จานสี และคำแนะนำเค้าโครง
     """
-    # นี่คือตัวอย่างการแยกวิเคราะห์อย่างง่าย อาจต้องใช้ regex หรือการประมวลผลภาษาธรรมชาติที่ซับซ้อนมากขึ้น
-    # ขึ้นอยู่กับรูปแบบผลลัพธ์ของ AI
     furniture_list = []
     color_palette = []
     layout_advice = []
@@ -46,26 +48,27 @@ def parse_ai_explanation(explanation_text: str) -> dict:
 
     for line in lines:
         line = line.strip()
-        if line.lower().startswith("suggested furniture:"):
+        if not line: continue
+        
+        if "furniture" in line.lower() or "item" in line.lower():
             current_section = "furniture"
             continue
-        elif line.lower().startswith("color palette:"):
+        elif "color" in line.lower() or "palette" in line.lower():
             current_section = "color"
             continue
-        elif line.lower().startswith("optimized layout advice:"):
+        elif "layout" in line.lower() or "advice" in line.lower():
             current_section = "layout"
             continue
 
-        if current_section == "furniture" and line and not line.lower().startswith("color palette:"):
-            furniture_list.append(line.replace("- ", ""))
-        elif current_section == "color" and line and not line.lower().startswith("optimized layout advice:"):
-            color_palette.append(line.replace("- ", ""))
-        elif current_section == "layout" and line:
-            layout_advice.append(line)
+        if current_section == "furniture":
+            furniture_list.append(line.strip("- *"))
+        elif current_section == "color":
+            color_palette.append(line.strip("- *"))
+        elif current_section == "layout":
+            layout_advice.append(line.strip("- *"))
 
     return {
         "suggested_furniture": furniture_list,
         "color_palette": color_palette,
         "optimized_layout_advice": layout_advice
     }
-
