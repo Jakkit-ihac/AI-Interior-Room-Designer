@@ -19,9 +19,6 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
         return f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&seed={seed}&model=flux"
 
     # ใช้โมเดล ControlNet Canny (SDXL) ที่รักษาเส้นโครงสร้างได้แม่นยำที่สุด
-    # โมเดล: xlabs-ai/controlnet-canny-sdxl
-    model_version = "d306389596963795744833984334338304977464334338304977464334338304" # Placeholder for a stable SDXL Canny
-    # หรือใช้โมเดลยอดนิยม: lucataco/controlnet-canny-sdxl
     model_id = "lucataco/controlnet-canny-sdxl:06d718b34f2142a3583d33967a99a209b9c2800291931057d25f9a21d78266ac"
     
     headers = {
@@ -80,33 +77,47 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
 def recommend_furniture_and_palette(design_prompt: str) -> str:
     """
     ใช้ Google Gemini 2.5 Flash เพื่ออธิบายการออกแบบและแนะนำเฟอร์นิเจอร์
+    หาก Gemini ใช้งานไม่ได้ (เช่น Error 403) จะใช้ Pollinations.ai (Text) เป็นทางเลือกสำรอง
     """
     api_key = os.environ.get("GOOGLE_API_KEY")
-    if not api_key:
-        return "Error: Please set GOOGLE_API_KEY in Streamlit Secrets."
+    
+    prompt_text = f"""
+    You are a professional interior designer. Based on this design concept: "{design_prompt}"
+    
+    Please provide:
+    1. A brief explanation of the design concept.
+    2. A list of 3-5 specific furniture items or decor pieces that fit this style.
+    3. A suggested color palette (with hex codes).
+    4. Practical layout advice to improve the room's flow.
 
+    Format your response clearly with sections:
+    - Design Concept: [Text]
+    - Suggested Furniture: [Item 1, Item 2, Item 3]
+    - Color Palette: [Color 1, Color 2, Color 3]
+    - Layout Advice: [Point 1, Point 2]
+    """
+
+    # ลองใช้ Gemini ก่อน
+    if api_key:
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-2.5-flash")
+            response = model.generate_content(prompt_text)
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            print(f"Gemini Error: {e}")
+            # ถ้า Gemini ล้มเหลว (เช่น 403) จะไปใช้ Pollinations ต่อด้านล่าง
+
+    # Fallback: ใช้ Pollinations.ai (Text API)
     try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.5-flash")
-
-        prompt = f"""
-        You are a professional interior designer. Based on this design concept: "{design_prompt}"
-        
-        Please provide:
-        1. A brief explanation of the design concept.
-        2. A list of 3-5 specific furniture items or decor pieces that fit this style.
-        3. A suggested color palette (with hex codes).
-        4. Practical layout advice to improve the room's flow.
-
-        Format your response clearly with sections:
-        - Design Concept: [Text]
-        - Suggested Furniture: [Item 1, Item 2, Item 3]
-        - Color Palette: [Color 1, Color 2, Color 3]
-        - Layout Advice: [Point 1, Point 2]
-        """
-
-        response = model.generate_content(prompt)
-        return response.text if response and response.text else "No recommendations available."
-            
+        # Pollinations.ai มี endpoint สำหรับ text generation ผ่าน GET request
+        encoded_prompt = urllib.parse.quote(prompt_text)
+        url = f"https://text.pollinations.ai/{encoded_prompt}"
+        res = requests.get(url, timeout=15)
+        if res.status_code == 200:
+            return res.text + "\n\n(Note: Generated using fallback AI engine)"
     except Exception as e:
-        return f"Error generating recommendations: {str(e)}"
+        print(f"Pollinations Text Error: {e}")
+
+    return "Sorry, I couldn't generate recommendations at this time. Please check your API settings."

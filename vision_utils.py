@@ -3,21 +3,25 @@ import google.generativeai as genai
 from PIL import Image
 import json
 import re
+import requests
+import urllib.parse
 
 def analyze_room(image_path: str) -> dict:
     """
     ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องแบบละเอียดสูงสุด (Deep Vision Analysis)
-    เพื่อดึงข้อมูลเชิงลึกของโครงสร้าง วัสดุ และตำแหน่งสิ่งของทุกชิ้น
+    หาก Gemini ใช้งานไม่ได้ (เช่น Error 403) จะใช้ระบบวิเคราะห์พื้นฐานแทน
     """
     api_key = os.environ.get("GOOGLE_API_KEY")
+    
+    # ข้อมูลพื้นฐานสำหรับกรณีที่ AI ทั้งหมดใช้งานไม่ได้
     default_response = {
         "room_type": "Living Room",
-        "current_furniture": ["furniture"],
-        "free_space": "some",
-        "wall_color": "white",
-        "natural_light_direction": "unknown",
-        "architectural_features": "standard room",
-        "detailed_description": "A standard room with basic furniture.",
+        "current_furniture": ["Sofa", "Table", "Chair"],
+        "free_space": "Moderate amount of floor space available.",
+        "wall_color_and_texture": "White painted walls",
+        "natural_light_and_lighting": "Standard indoor lighting",
+        "architectural_features": "Standard rectangular room structure",
+        "detailed_description": "A standard room with basic furniture and layout. (Note: Deep analysis is currently unavailable, using default description)",
         "spatial_layout_analysis": "Standard layout with furniture placed along the walls."
     }
     
@@ -66,10 +70,9 @@ def analyze_room(image_path: str) -> dict:
             json_str = json_match.group(0)
             return json.loads(json_str)
         else:
-            # Fallback if no JSON found
-            print(f"No JSON found in response: {text_response}")
             return default_response
             
     except Exception as e:
         print(f"Error in analyze_room: {e}")
+        # หากเกิด Error 403 หรือปัญหาอื่นๆ ให้ส่งค่า Default กลับไปเพื่อให้แอปทำงานต่อได้
         return default_response
