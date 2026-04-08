@@ -4,6 +4,7 @@ import os
 import requests
 import base64
 import time
+import json
 from vision_utils import analyze_room
 from prompt_utils import build_design_prompt
 from image_gen_utils import generate_design, recommend_furniture_and_palette
@@ -52,6 +53,14 @@ st.markdown("""
         border-bottom: 2px solid #007bff;
         padding-bottom: 10px;
         margin-bottom: 20px;
+    }
+    pre {
+        background-color: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 0.9em;
+        overflow-x: auto;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -105,7 +114,7 @@ with col1:
         img.save(temp_path)
         
         if st.button("🔍 เริ่มวิเคราะห์ห้องแบบละเอียด (Deep Analysis)"):
-            with st.spinner("AI กำลังวิเคราะห์ทุกรายละเอียดในห้องของคุณ..."):
+            with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้องแบบละเอียดสูงสุด (Deep Structural Analysis)..."):
                 analysis = analyze_room(temp_path)
                 st.session_state['analysis'] = analysis
                 # อัปโหลดรูปเพื่อเตรียมส่งให้ Replicate
@@ -119,15 +128,14 @@ with col2:
         analysis = st.session_state['analysis']
         
         # แสดงข้อมูลที่วิเคราะห์ได้แบบละเอียด
-        st.subheader("📝 รายละเอียดห้องที่ตรวจพบ")
-        st.markdown(f'<div class="analysis-box"><b>ประเภทห้อง:</b> {analysis.get("room_type", "unknown")}</div>', unsafe_allow_html=True)
+        st.subheader("📝 รายละเอียดห้องที่ตรวจพบ (Deep Structural JSON)")
         
-        with st.expander("🔍 ดูคำบรรยายห้องแบบละเอียด (Deep Description)", expanded=True):
-            st.write(analysis.get("detailed_description", "No detailed description available."))
-            st.write("---")
-            st.write(f"**เฟอร์นิเจอร์และตำแหน่ง:** {', '.join(analysis.get('current_furniture', []))}")
-            st.write(f"**โครงสร้างและวัสดุ:** {analysis.get('architectural_features', 'unknown')}")
-            st.write(f"**แสงและบรรยากาศ:** {analysis.get('natural_light_and_lighting', 'unknown')}")
+        # ดึงข้อมูลหลักมาแสดงใน UI แบบสรุป
+        metadata = analysis.get("room_metadata", {})
+        st.markdown(f'<div class="analysis-box"><b>ประเภทห้อง:</b> {metadata.get("room_type", "unknown")} | <b>มุมมอง:</b> {metadata.get("camera_perspective", "unknown")}</div>', unsafe_allow_html=True)
+        
+        with st.expander("🔍 ดูโครงสร้าง JSON แบบละเอียด (Deep Structural Data)", expanded=True):
+            st.json(analysis)
         
         st.markdown("---")
         interior_style = st.selectbox(
@@ -140,13 +148,16 @@ with col2:
         if st.button("✨ เริ่มออกแบบห้องใหม่"):
             with st.spinner("AI กำลังวาดรูปใหม่ (อาจใช้เวลา 30-60 วินาที)..."):
                 # สร้าง Prompt โดยใช้ข้อมูลที่วิเคราะห์ได้ทั้งหมด
+                detailed_narrative = analysis.get("detailed_narrative", "")
+                furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
+                
                 design_prompt = build_design_prompt(
-                    analysis.get("room_type", "room"),
+                    metadata.get("room_type", "room"),
                     interior_style,
-                    analysis.get("current_furniture", []),
-                    analysis.get("wall_color_and_texture", "white"),
-                    analysis.get("natural_light_and_lighting", "unknown"),
-                    f"{custom_prompt}. {analysis.get('detailed_description', '')}"
+                    furniture_list,
+                    analysis.get("structural_elements", {}).get("walls", "white"),
+                    analysis.get("lighting_and_atmosphere", {}).get("natural_light", "unknown"),
+                    f"{custom_prompt}. {detailed_narrative}"
                 )
                 
                 # สร้างรูปภาพ (ส่ง URL รูปต้นฉบับไปด้วยเพื่อทำ Image-to-Image)

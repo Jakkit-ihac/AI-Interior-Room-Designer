@@ -8,21 +8,39 @@ import urllib.parse
 
 def analyze_room(image_path: str) -> dict:
     """
-    ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องแบบละเอียดสูงสุด (Deep Vision Analysis)
-    หาก Gemini ใช้งานไม่ได้ (เช่น Error 403) จะใช้ระบบวิเคราะห์พื้นฐานแทน
+    ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องแบบละเอียดสูงสุด (Deep Structural Analysis)
+    โดยส่งผลลัพธ์เป็น JSON ที่ครอบคลุมทั้งโครงสร้าง ขนาด มุม และตำแหน่งวัตถุ
     """
     api_key = os.environ.get("GOOGLE_API_KEY")
     
     # ข้อมูลพื้นฐานสำหรับกรณีที่ AI ทั้งหมดใช้งานไม่ได้
     default_response = {
-        "room_type": "Living Room",
-        "current_furniture": ["Sofa", "Table", "Chair"],
-        "free_space": "Moderate amount of floor space available.",
-        "wall_color_and_texture": "White painted walls",
-        "natural_light_and_lighting": "Standard indoor lighting",
-        "architectural_features": "Standard rectangular room structure",
-        "detailed_description": "A standard room with basic furniture and layout. (Note: Deep analysis is currently unavailable, using default description)",
-        "spatial_layout_analysis": "Standard layout with furniture placed along the walls."
+        "room_metadata": {
+            "room_type": "Living Room",
+            "estimated_dimensions": "Standard size",
+            "camera_perspective": "Eye-level, wide angle"
+        },
+        "structural_elements": {
+            "walls": "White painted walls",
+            "floor": "Standard flooring",
+            "ceiling": "Flat white ceiling",
+            "fixed_features": ["Door", "Window"]
+        },
+        "furniture_mapping": [
+            {"item": "Sofa", "position": "Center", "style": "Modern"},
+            {"item": "Table", "position": "Front of sofa", "style": "Minimalist"}
+        ],
+        "lighting_and_atmosphere": {
+            "natural_light": "Standard",
+            "artificial_light": "Ceiling lights",
+            "mood": "Neutral"
+        },
+        "spatial_geometry": {
+            "corners_detected": "4 main corners",
+            "focal_point": "Center of the room",
+            "clutter_level": "Low"
+        },
+        "detailed_narrative": "A standard room with basic furniture and layout. (Note: Deep analysis is currently unavailable, using default description)"
     }
     
     if not api_key:
@@ -30,33 +48,29 @@ def analyze_room(image_path: str) -> dict:
 
     try:
         genai.configure(api_key=api_key)
-        # ใช้โมเดล gemini-2.5-flash ล่าสุดเพื่อความแม่นยำสูงสุด
         model = genai.GenerativeModel("gemini-2.5-flash")
 
         prompt = """
-        As an expert interior architect and vision AI, analyze this room image with extreme precision. 
-        I need a comprehensive breakdown of EVERYTHING in the room to ensure the redesign maintains the exact structural integrity.
-        
-        Please identify and describe in detail:
-        1. Room Type: Primary function of the space.
-        2. Furniture Inventory & Mapping: List every piece of furniture, its style, material, and EXACT coordinate-like position (e.g., 'Large wooden bed occupies the center-back area', 'Black office chair at the bottom-right corner').
-        3. Architectural DNA: Describe walls, floor material (e.g., 'white ceramic tiles'), ceiling type, and any fixed elements like doors, windows, or pillars with their exact locations.
-        4. Lighting & Atmosphere: Direction of natural light, types of artificial lights present, and the current 'mood' of the room.
-        5. Spatial Geometry: A narrative description of the room's shape, dimensions, and how objects are distributed.
-        6. Clutter & Usage: Identify areas with many small items or specific usage zones (e.g., 'music corner with a keyboard on the left').
+        As an expert interior architect and vision AI, perform a DEEP STRUCTURAL ANALYSIS of this room. 
+        Your goal is to create a digital twin blueprint in JSON format to ensure 100% structural preservation during redesign.
 
-        Provide the output strictly in a valid JSON format like:
+        Analyze and provide the following in a STRICT JSON format:
+        1. room_metadata: Type, estimated dimensions (width/length/height ratio), and camera perspective (e.g., 'low-angle looking up', 'wide-angle from corner').
+        2. structural_elements: Detailed description of walls (color/texture), floor (material/pattern), ceiling (type/features), and EXACT locations of fixed elements like doors, windows, pillars, or built-in cabinets.
+        3. furniture_mapping: A list of objects. For each object, specify: 'item', 'style', 'material', and 'position' using a 3x3 grid reference (e.g., 'Top-Left', 'Center-Bottom', 'Back-Right').
+        4. lighting_and_atmosphere: Direction and intensity of natural light, types of artificial light sources, and the current color temperature/mood.
+        5. spatial_geometry: Identify the room's corners, focal point, and any unique architectural angles or slopes.
+        6. detailed_narrative: A technical, highly descriptive paragraph explaining the room's layout as if for a 3D modeler.
+
+        Output MUST be ONLY the JSON object. No markdown formatting, no preamble.
         {
-            "room_type": "string",
-            "current_furniture": ["item 1 with position", "item 2 with position"],
-            "free_space": "string description",
-            "wall_color_and_texture": "string",
-            "natural_light_and_lighting": "string",
-            "architectural_features": "string",
-            "detailed_description": "A very long, detailed paragraph describing every detail of the room as if explaining it to a blind person.",
-            "spatial_layout_analysis": "A technical description of the room's geometry and object placement."
+            "room_metadata": { ... },
+            "structural_elements": { ... },
+            "furniture_mapping": [ { ... }, ... ],
+            "lighting_and_atmosphere": { ... },
+            "spatial_geometry": { ... },
+            "detailed_narrative": "..."
         }
-        Do not include any other text or explanation outside the JSON.
         """
 
         img = Image.open(image_path)
@@ -74,5 +88,4 @@ def analyze_room(image_path: str) -> dict:
             
     except Exception as e:
         print(f"Error in analyze_room: {e}")
-        # หากเกิด Error 403 หรือปัญหาอื่นๆ ให้ส่งค่า Default กลับไปเพื่อให้แอปทำงานต่อได้
         return default_response
