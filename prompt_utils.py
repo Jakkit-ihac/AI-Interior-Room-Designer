@@ -11,18 +11,23 @@ def build_design_prompt(
     custom_prompt: str = None
 ) -> str:
     """
-    สร้าง prompt สำหรับ AI เพื่อสร้างการออกแบบห้องใหม่
+    สร้าง prompt สำหรับ AI เพื่อสร้างการออกแบบห้องใหม่ โดยเน้นการรักษาเค้าโครงเดิม (Spatial Layout)
     """
-    base_prompt = f"""Redesign this {room_type} into a {interior_style} style.
-    Current furniture includes: {", ".join(current_furniture)}.
-    There is {free_space} free space.
-    The current wall color is {wall_color}.
-    Natural light comes from the {natural_light_direction}.
-    """
+    # สร้างรายละเอียดของเฟอร์นิเจอร์เดิมและตำแหน่ง (ถ้ามีข้อมูล)
+    furniture_desc = ", ".join(current_furniture) if current_furniture else "basic furniture"
+    
+    # สร้าง Prompt ที่เน้นโครงสร้าง (Structural-focused Prompt)
+    base_prompt = f"Professional interior design photography of a {room_type} redesigned in {interior_style} style. "
+    base_prompt += f"CRITICAL: Maintain the exact same architectural layout, wall positions, and spatial structure of the original room. "
+    base_prompt += f"The room currently has {furniture_desc}. "
+    base_prompt += f"Keep the main furniture in their original positions but upgrade them to match the {interior_style} aesthetic. "
+    base_prompt += f"The wall color should be updated from {wall_color} to a palette suitable for {interior_style}. "
+    base_prompt += f"Natural light from {natural_light_direction} must be preserved. "
+    base_prompt += "High quality, 8k resolution, photorealistic, architectural digest style, cinematic lighting."
 
     if custom_prompt:
-        base_prompt += f" {custom_prompt}"
-
+        base_prompt += f" Additional requirements: {custom_prompt}"
+        
     return base_prompt
 
 def parse_ai_explanation(explanation_text: str) -> dict:

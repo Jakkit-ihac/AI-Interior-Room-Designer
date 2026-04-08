@@ -23,20 +23,22 @@ def analyze_room(image_path: str) -> dict:
     model = genai.GenerativeModel("gemini-2.5-flash")
 
     prompt = """
-    Analyze this room image. Identify:
+    Analyze this room image in detail for an interior design task. Identify:
     1. Room type (e.g., Living Room, Bedroom, etc.)
-    2. List of existing furniture
+    2. List of existing furniture with their relative positions (e.g., 'bed in the center', 'desk on the left')
     3. Approximate free space (e.g., 'a lot', 'some', 'limited')
-    4. Dominant wall color
-    5. Natural light direction (e.g., 'from the left', 'from the right', 'overhead', 'none')
+    4. Dominant wall color and texture
+    5. Natural light direction and source (e.g., 'large window on the right')
+    6. Key architectural features (e.g., 'slanted ceiling', 'door on the back wall')
 
     Provide the output strictly in a valid JSON format like:
     {
         "room_type": "",
-        "current_furniture": [],
+        "current_furniture": ["item 1 with position", "item 2 with position"],
         "free_space": "",
         "wall_color": "",
-        "natural_light_direction": ""
+        "natural_light_direction": "",
+        "architectural_features": ""
     }
     """
 

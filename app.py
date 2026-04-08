@@ -83,7 +83,7 @@ if uploaded_file is not None:
                     wall_color=st.session_state.room_analysis.get("wall_color", "unknown"),
                     natural_light_direction=st.session_state.room_analysis.get("natural_light_direction", "unknown"),
                     interior_style=selected_style,
-                    custom_prompt=custom_prompt_input
+                    custom_prompt=f"{custom_prompt_input}. Architectural features to maintain: {st.session_state.room_analysis.get('architectural_features', 'none')}"
                 )
                 
                 # Generate redesigned room image
