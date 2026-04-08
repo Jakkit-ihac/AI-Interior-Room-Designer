@@ -1,3 +1,5 @@
+
 streamlit
-openai
-pillow
+google-generativeai
+Pillow
+python-dotenv

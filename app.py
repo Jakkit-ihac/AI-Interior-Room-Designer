@@ -29,31 +29,31 @@ if uploaded_file is not None:
         f.write(uploaded_file.getbuffer())
 
     st.subheader("ขั้นตอนที่ 1: วิเคราะห์ห้องของคุณ")
-    with st.spinner("AI กำลังวิเคราะห์ห้องของคุณ..."):
-        room_analysis = analyze_room(image_path)
-        st.success("วิเคราะห์ห้องเสร็จสมบูรณ์!")
-        st.json(room_analysis)
+    if "GOOGLE_API_KEY" not in os.environ:
+        st.warning("กรุณาตั้งค่า GOOGLE_API_KEY ใน Streamlit Secrets")
+    else:
+        with st.spinner("AI กำลังวิเคราะห์ห้องของคุณ..."):
+            room_analysis = analyze_room(image_path)
+            st.success("วิเคราะห์ห้องเสร็จสมบูรณ์!")
+            st.json(room_analysis)
 
-    # 2. User Selects Interior Style and other options
-    st.subheader("ขั้นตอนที่ 2: เลือกสไตล์การออกแบบ")
-    col1, col2 = st.columns(2)
-    with col1:
-        room_type_options = [room_analysis.get("room_type", "unknown"), "Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Gaming Room"]
-        selected_room_type = st.selectbox("ประเภทห้อง", list(set(room_type_options)))
-        selected_style = st.selectbox(
-            "เลือกสไตล์การตกแต่งภายใน",
-            ("Minimal", "Modern Luxury", "Scandinavian", "Gaming Room", "Japanese Muji", "Industrial", "Bohemian", "Coastal")
-        )
-    with col2:
-        custom_prompt_input = st.text_area(
-            "เพิ่มคำแนะนำพิเศษสำหรับ AI (ไม่บังคับ)",
-            placeholder="เช่น: 'คงตำแหน่งเตียงไว้ เพิ่มโต๊ะทำงานใกล้หน้าต่าง'"
-        )
+        # 2. User Selects Interior Style and other options
+        st.subheader("ขั้นตอนที่ 2: เลือกสไตล์การออกแบบ")
+        col1, col2 = st.columns(2)
+        with col1:
+            room_type_options = [room_analysis.get("room_type", "unknown"), "Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Gaming Room"]
+            selected_room_type = st.selectbox("ประเภทห้อง", list(set(room_type_options)))
+            selected_style = st.selectbox(
+                "เลือกสไตล์การตกแต่งภายใน",
+                ("Minimal", "Modern Luxury", "Scandinavian", "Gaming Room", "Japanese Muji", "Industrial", "Bohemian", "Coastal")
+            )
+        with col2:
+            custom_prompt_input = st.text_area(
+                "เพิ่มคำแนะนำพิเศษสำหรับ AI (ไม่บังคับ)",
+                placeholder="เช่น: 'คงตำแหน่งเตียงไว้ เพิ่มโต๊ะทำงานใกล้หน้าต่าง'"
+            )
 
-    if st.button("สร้างการออกแบบห้องใหม่"):
-        if "OPENAI_API_KEY" not in os.environ:
-            st.error("กรุณาตั้งค่า OpenAI API Key ใน Environment Variable")
-        else:
+        if st.button("สร้างการออกแบบห้องใหม่"):
             st.subheader("ขั้นตอนที่ 3: AI กำลังสร้างการออกแบบ...")
             with st.spinner("AI กำลังสร้าง prompt และออกแบบห้องใหม่..."):
                 # Build design prompt
@@ -101,8 +101,6 @@ if uploaded_file is not None:
                 for advice in design_recommendations.get("optimized_layout_advice", []):
                     st.markdown(f"- {advice}")
 
-                # Download Button (Placeholder - actual download requires more complex handling for external URLs)
-                # For simplicity, we'll just provide the URL for now.
                 st.markdown(f"**ดาวน์โหลดรูปภาพที่ออกแบบ:** [คลิกที่นี่]({redesigned_image_url})")
 
                 # --- Validation Metrics (Sample) ---
@@ -120,4 +118,3 @@ if uploaded_file is not None:
     # Clean up temporary image file
     if os.path.exists(image_path):
         os.remove(image_path)
-

@@ -1,42 +1,48 @@
 
 import os
-from openai import OpenAI
+import google.generativeai as genai
 
-client = OpenAI()
+def generate_design(design_prompt: str) -> str:
+    """
+    สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ AI Image Generation (Pollinations.ai)
+    """
+    # ในโปรเจกต์นี้ เราจะใช้ Pollinations.ai ซึ่งเป็นบริการสร้างรูปภาพฟรีจาก Text
+    # เพื่อให้แอปพลิเคชันทำงานได้โดยไม่ต้องใช้ OpenAI API Key
+    encoded_prompt = design_prompt.replace(" ", "%20")
+    image_url = f"https://pollinations.ai/p/{encoded_prompt}?width=1024&height=768&seed=42&model=flux"
+    return image_url
 
-def generate_design(prompt: str) -> str:
+def recommend_furniture_and_palette(design_prompt: str) -> str:
     """
-    สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ AI Image Generation
+    ใช้ Google Gemini 1.5 Flash เพื่ออธิบายการออกแบบและแนะนำเฟอร์นิเจอร์
     """
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return "Please set GOOGLE_API_KEY in Streamlit Secrets to get design recommendations."
+
+    genai.configure(api_key=api_key)
+    # ใช้โมเดล gemini-1.5-flash
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
+    prompt = f"""
+    You are an AI interior designer. Based on this interior design prompt: "{design_prompt}"
+    
+    Please provide:
+    1. A brief explanation of the design concept.
+    2. A list of 3-5 suggested furniture items or decor pieces.
+    3. A suggested color palette (hex codes or descriptive names).
+    4. Optimized layout advice for the room.
+
+    Format your response clearly with sections for:
+    - Explanation: [Brief text]
+    - Suggested Furniture: [Item 1, Item 2, Item 3]
+    - Color Palette: [Color 1, Color 2, Color 3]
+    - Optimized Layout Advice: [Point 1, Point 2]
+    """
+
     try:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
-        image_url = response.data[0].url
-        return image_url
+        response = model.generate_content(prompt)
+        return response.text
     except Exception as e:
-        print(f"Error generating image: {e}")
-        return ""
-
-def recommend_furniture_and_palette(prompt: str) -> str:
-    """
-    ใช้ LLM เพื่อแนะนำเฟอร์นิเจอร์และจานสีตาม prompt การออกแบบ
-    """
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o", # Using GPT-4o for better reasoning
-            messages=[
-                {"role": "system", "content": "You are an AI interior designer. Based on the provided design prompt, suggest a list of furniture, a color palette (3-5 colors with hex codes if possible), and optimized layout advice. Format your response clearly with sections for 'Suggested Furniture:', 'Color Palette:', and 'Optimized Layout Advice:'."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=500,
-        )
-        explanation_text = response.choices[0].message.content
-        return explanation_text
-    except Exception as e:
-        print(f"Error recommending furniture and palette: {e}")
-        return ""
+        print(f"Error in recommend_furniture_and_palette: {e}")
+        return "Could not generate recommendations at this time."
