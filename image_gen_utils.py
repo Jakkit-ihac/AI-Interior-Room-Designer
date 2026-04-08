@@ -1,21 +1,86 @@
 import os
 import google.generativeai as genai
-import urllib.parse
+import requests
+import time
 import random
 
-def generate_design(design_prompt: str) -> str:
+def generate_design(design_prompt: str, image_url: str = None) -> str:
     """
-    สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ AI Image Generation (Pollinations.ai)
+    สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ Replicate API (Image-to-Image)
+    เพื่อรักษาโครงสร้างห้องเดิม (ControlNet/Stable Diffusion)
     """
-    # ใช้ urllib.parse.quote เพื่อจัดการอักขระพิเศษให้ถูกต้องตามมาตรฐาน URL
-    encoded_prompt = urllib.parse.quote(design_prompt)
+    replicate_api_token = os.environ.get("REPLICATE_API_TOKEN")
+    if not replicate_api_token:
+        return "Error: Please set REPLICATE_API_TOKEN in Streamlit Secrets."
+
+    # หากไม่มีรูปภาพต้นฉบับ ให้กลับไปใช้ Pollinations.ai เป็นทางเลือกสำรอง (Fallback)
+    if not image_url:
+        import urllib.parse
+        encoded_prompt = urllib.parse.quote(design_prompt)
+        seed = random.randint(1, 1000000)
+        return f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&seed={seed}&model=flux"
+
+    # ใช้โมเดล ControlNet (MLSD/Canny) เพื่อรักษาโครงสร้างห้องเดิม
+    # ในที่นี้เราจะใช้โมเดลที่ได้รับความนิยมสำหรับ Interior Design บน Replicate
+    # เช่น jagilley/controlnet-hough (เหมาะสำหรับเส้นตรงและโครงสร้างห้อง)
+    model_version = "709492abc10e47024038ad9ca3005e8a93d0728e006c1c0ad2d9205f2806f77a" # controlnet-hough
     
-    # สุ่มค่า seed เพื่อให้การสร้างรูปภาพมีความหลากหลายในแต่ละครั้ง
-    seed = random.randint(1, 1000000)
-    
-    # ใช้โดเมน image.pollinations.ai/prompt/ เพื่อดึงไฟล์รูปภาพโดยตรง (Direct Image File)
-    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&seed={seed}&model=flux"
-    return image_url
+    headers = {
+        "Authorization": f"Token {replicate_api_token}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "version": model_version,
+        "input": {
+            "image": image_url,
+            "prompt": design_prompt,
+            "num_samples": "1",
+            "image_resolution": "768",
+            "ddim_steps": 20,
+            "scale": 9,
+            "eta": 0,
+            "a_prompt": "best quality, extremely detailed, photo from architectural digest, interior design, 8k, realistic",
+            "n_prompt": "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality"
+        }
+    }
+
+    try:
+        # สร้าง Prediction
+        response = requests.post(
+            "https://api.replicate.com/v1/predictions",
+            headers=headers,
+            json=payload
+        )
+        prediction = response.json()
+        
+        if "urls" not in prediction:
+            return f"Error starting Replicate prediction: {prediction.get('detail', 'Unknown error')}"
+            
+        prediction_id = prediction["id"]
+        get_url = prediction["urls"]["get"]
+
+        # รอผลลัพธ์ (Polling)
+        while True:
+            res = requests.get(get_url, headers=headers)
+            res_json = res.json()
+            status = res_json["status"]
+            
+            if status == "succeeded":
+                # คืนค่า URL ของรูปภาพผลลัพธ์ (ปกติจะเป็นรายการ)
+                output = res_json.get("output")
+                if isinstance(output, list) and len(output) > 1:
+                    return output[1] # มักจะเป็นรูปที่ 2 สำหรับโมเดล ControlNet (รูปแรกคือเส้นโครงสร้าง)
+                elif isinstance(output, list) and len(output) > 0:
+                    return output[0]
+                return output
+            elif status == "failed":
+                return f"Error: Replicate prediction failed: {res_json.get('error')}"
+            
+            time.sleep(2) # รอ 2 วินาทีก่อนเช็คใหม่
+
+    except Exception as e:
+        return f"Error calling Replicate API: {str(e)}"
 
 def recommend_furniture_and_palette(design_prompt: str) -> str:
     """
@@ -27,9 +92,6 @@ def recommend_furniture_and_palette(design_prompt: str) -> str:
 
     try:
         genai.configure(api_key=api_key)
-        
-        # ใช้ gemini-1.5-flash เป็นหลักเพื่อความเสถียรสูงสุดในปัจจุบัน
-        # เนื่องจาก gemini-2.5-flash อาจยังไม่เปิดให้เรียกใช้ผ่าน SDK ในบางพื้นที่
         model = genai.GenerativeModel("gemini-1.5-flash")
 
         prompt = f"""
