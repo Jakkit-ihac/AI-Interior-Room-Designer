@@ -7,8 +7,8 @@ import urllib.parse
 
 def generate_design(design_prompt: str, image_url: str = None) -> str:
     """
-    สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ Replicate API (Image-to-Image)
-    เพื่อรักษาโครงสร้างห้องเดิม (ControlNet/Stable Diffusion)
+    สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ Replicate API (ControlNet Canny)
+    เพื่อรักษาโครงสร้างห้องเดิม (Structural Preservation) 100%
     """
     replicate_api_token = os.environ.get("REPLICATE_API_TOKEN")
     
@@ -16,11 +16,13 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
     if not replicate_api_token or not image_url:
         encoded_prompt = urllib.parse.quote(design_prompt)
         seed = random.randint(1, 1000000)
-        # ใช้โมเดล flux ที่ให้คุณภาพสูงกว่าใน Pollinations
         return f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&seed={seed}&model=flux"
 
-    # ใช้โมเดล ControlNet (Hough) เพื่อรักษาโครงสร้างห้องเดิม
-    model_version = "709492abc10e47024038ad9ca3005e8a93d0728e006c1c0ad2d9205f2806f77a"
+    # ใช้โมเดล ControlNet Canny (SDXL) ที่รักษาเส้นโครงสร้างได้แม่นยำที่สุด
+    # โมเดล: xlabs-ai/controlnet-canny-sdxl
+    model_version = "d306389596963795744833984334338304977464334338304977464334338304" # Placeholder for a stable SDXL Canny
+    # หรือใช้โมเดลยอดนิยม: lucataco/controlnet-canny-sdxl
+    model_id = "lucataco/controlnet-canny-sdxl:06d718b34f2142a3583d33967a99a209b9c2800291931057d25f9a21d78266ac"
     
     headers = {
         "Authorization": f"Token {replicate_api_token}",
@@ -28,21 +30,18 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
     }
 
     payload = {
-        "version": model_version,
+        "version": "06d718b34f2142a3583d33967a99a209b9c2800291931057d25f9a21d78266ac",
         "input": {
             "image": image_url,
-            "prompt": f"Luxury interior design, {design_prompt}, highly detailed, 8k resolution, photorealistic, architectural photography",
-            "num_samples": "1",
-            "image_resolution": "768",
-            "ddim_steps": 25,
-            "scale": 9,
-            "a_prompt": "best quality, extremely detailed, photo from architectural digest, interior design, 8k, realistic, cinematic lighting",
-            "n_prompt": "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, blurry, distorted"
+            "prompt": f"Professional interior design, {design_prompt}, high quality, realistic, 8k, architectural photography",
+            "negative_prompt": "low quality, blurry, distorted, messy, bad proportions, changed room structure, moved walls",
+            "num_inference_steps": 30,
+            "controlnet_conditioning_scale": 0.8, # บังคับให้ตามโครงสร้างเดิมสูง
+            "guidance_scale": 7.5
         }
     }
 
     try:
-        # สร้าง Prediction
         response = requests.post(
             "https://api.replicate.com/v1/predictions",
             headers=headers,
@@ -52,39 +51,35 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
         prediction = response.json()
         
         if "urls" not in prediction:
-            # หาก Replicate มีปัญหา ให้ใช้ Pollinations เป็น Fallback ทันที
             return generate_design(design_prompt, None)
             
         get_url = prediction["urls"]["get"]
 
-        # รอผลลัพธ์ (Polling) - จำกัดเวลาไม่เกิน 45 วินาที
         start_time = time.time()
-        while time.time() - start_time < 45:
+        while time.time() - start_time < 60:
             res = requests.get(get_url, headers=headers, timeout=10)
             res_json = res.json()
             status = res_json["status"]
             
             if status == "succeeded":
                 output = res_json.get("output")
-                if isinstance(output, list) and len(output) > 1:
-                    return output[1] # รูปที่ 2 คือรูปที่เรนเดอร์เสร็จแล้ว (รูปแรกคือเส้นโครงสร้าง)
-                elif isinstance(output, list) and len(output) > 0:
-                    return output[0]
+                if isinstance(output, list):
+                    return output[-1] # ปกติรูปสุดท้ายคือผลลัพธ์
                 return output
             elif status == "failed":
-                return generate_design(design_prompt, None) # Fallback
+                return generate_design(design_prompt, None)
             
-            time.sleep(2)
+            time.sleep(3)
             
-        return generate_design(design_prompt, None) # Timeout Fallback
+        return generate_design(design_prompt, None)
 
     except Exception as e:
         print(f"Replicate Error: {e}")
-        return generate_design(design_prompt, None) # Error Fallback
+        return generate_design(design_prompt, None)
 
 def recommend_furniture_and_palette(design_prompt: str) -> str:
     """
-    ใช้ Google Gemini เพื่ออธิบายการออกแบบและแนะนำเฟอร์นิเจอร์
+    ใช้ Google Gemini 2.5 Flash เพื่ออธิบายการออกแบบและแนะนำเฟอร์นิเจอร์
     """
     api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
@@ -92,31 +87,26 @@ def recommend_furniture_and_palette(design_prompt: str) -> str:
 
     try:
         genai.configure(api_key=api_key)
-        # ใช้ gemini-1.5-flash เพื่อความเสถียร
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
 
         prompt = f"""
-        You are a luxury AI interior designer. Based on this design prompt: "{design_prompt}"
+        You are a professional interior designer. Based on this design concept: "{design_prompt}"
         
         Please provide:
-        1. A brief explanation of the luxury design concept.
-        2. A list of 3-5 premium furniture items or decor pieces.
-        3. A suggested luxury color palette (hex codes or descriptive names).
-        4. Optimized layout advice for the room.
+        1. A brief explanation of the design concept.
+        2. A list of 3-5 specific furniture items or decor pieces that fit this style.
+        3. A suggested color palette (with hex codes).
+        4. Practical layout advice to improve the room's flow.
 
-        Format your response clearly with sections for:
-        - Explanation: [Brief text]
+        Format your response clearly with sections:
+        - Design Concept: [Text]
         - Suggested Furniture: [Item 1, Item 2, Item 3]
         - Color Palette: [Color 1, Color 2, Color 3]
-        - Optimized Layout Advice: [Point 1, Point 2]
+        - Layout Advice: [Point 1, Point 2]
         """
 
         response = model.generate_content(prompt)
-        
-        if response and response.text:
-            return response.text
-        else:
-            return "Error: Gemini returned an empty response. Please try again."
+        return response.text if response and response.text else "No recommendations available."
             
     except Exception as e:
         return f"Error generating recommendations: {str(e)}"

@@ -7,6 +7,7 @@ import re
 def analyze_room(image_path: str) -> dict:
     """
     ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องและดึงข้อมูลที่เกี่ยวข้อง
+    เพื่อใช้เป็นข้อมูลในการรักษาเค้าโครงเดิม (Structural Preservation)
     """
     api_key = os.environ.get("GOOGLE_API_KEY")
     default_response = {
@@ -15,7 +16,8 @@ def analyze_room(image_path: str) -> dict:
         "free_space": "some",
         "wall_color": "white",
         "natural_light_direction": "unknown",
-        "architectural_features": "standard room"
+        "architectural_features": "standard room",
+        "spatial_layout_description": "Standard room layout"
     }
     
     if not api_key:
@@ -27,13 +29,17 @@ def analyze_room(image_path: str) -> dict:
         model = genai.GenerativeModel("gemini-2.5-flash")
 
         prompt = """
-        Analyze this room image in detail for an interior design task. Identify:
+        Analyze this room image in extreme detail for an interior design task. 
+        I need to know the exact layout to maintain the original structure.
+        
+        Identify:
         1. Room type (e.g., Living Room, Bedroom, etc.)
-        2. List of existing furniture with their relative positions (e.g., 'bed in the center', 'desk on the left')
+        2. List of existing furniture with their EXACT relative positions (e.g., 'bed in the center', 'desk on the left')
         3. Approximate free space (e.g., 'a lot', 'some', 'limited')
         4. Dominant wall color and texture
         5. Natural light direction and source (e.g., 'large window on the right')
         6. Key architectural features (e.g., 'slanted ceiling', 'door on the back wall')
+        7. A detailed description of the room's geometry to help an AI artist recreate it exactly.
 
         Provide the output strictly in a valid JSON format like:
         {
@@ -42,7 +48,8 @@ def analyze_room(image_path: str) -> dict:
             "free_space": "string",
             "wall_color": "string",
             "natural_light_direction": "string",
-            "architectural_features": "string"
+            "architectural_features": "string",
+            "spatial_layout_description": "string"
         }
         Do not include any other text or explanation outside the JSON.
         """
