@@ -1,6 +1,8 @@
 
 import os
 import google.generativeai as genai
+import urllib.parse
+import random
 
 def generate_design(design_prompt: str) -> str:
     """
@@ -8,8 +10,15 @@ def generate_design(design_prompt: str) -> str:
     """
     # ในโปรเจกต์นี้ เราจะใช้ Pollinations.ai ซึ่งเป็นบริการสร้างรูปภาพฟรีจาก Text
     # เพื่อให้แอปพลิเคชันทำงานได้โดยไม่ต้องใช้ OpenAI API Key
-    encoded_prompt = design_prompt.replace(" ", "%20")
-    image_url = f"https://pollinations.ai/p/{encoded_prompt}?width=1024&height=768&seed=42&model=flux"
+    # ใช้ urllib.parse.quote เพื่อจัดการอักขระพิเศษให้ถูกต้องตามมาตรฐาน URL
+    encoded_prompt = urllib.parse.quote(design_prompt)
+    
+    # สุ่มค่า seed เพื่อให้การสร้างรูปภาพมีความหลากหลายในแต่ละครั้ง
+    seed = random.randint(1, 1000000)
+    
+    # ใช้โดเมน image.pollinations.ai/prompt/ เพื่อดึงไฟล์รูปภาพโดยตรง (Direct Image File)
+    # วิธีนี้จะเสถียรกว่าการใช้ /p/ path ซึ่งบางครั้งอาจส่งกลับมาเป็นหน้า HTML
+    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&seed={seed}&model=flux"
     return image_url
 
 def recommend_furniture_and_palette(design_prompt: str) -> str:
