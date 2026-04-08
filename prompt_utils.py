@@ -16,14 +16,15 @@ def build_design_prompt(
     # สร้างรายละเอียดของเฟอร์นิเจอร์เดิมและตำแหน่ง (ถ้ามีข้อมูล)
     furniture_desc = ", ".join(current_furniture) if current_furniture else "basic furniture"
     
-    # สร้าง Prompt ที่เน้นโครงสร้าง (Structural-focused Prompt)
-    base_prompt = f"Professional interior design photography of a {room_type} redesigned in {interior_style} style. "
-    base_prompt += f"CRITICAL: Maintain the exact same architectural layout, wall positions, and spatial structure of the original room. "
-    base_prompt += f"The room currently has {furniture_desc}. "
-    base_prompt += f"Keep the main furniture in their original positions but upgrade them to match the {interior_style} aesthetic. "
-    base_prompt += f"The wall color should be updated from {wall_color} to a palette suitable for {interior_style}. "
-    base_prompt += f"Natural light from {natural_light_direction} must be preserved. "
-    base_prompt += "High quality, 8k resolution, photorealistic, architectural digest style, cinematic lighting."
+    # สร้าง Prompt ที่เน้นการรีโนเวท (Renovation-focused Prompt)
+    # เน้นคำว่า "Renovation" และ "In-place decoration" เพื่อให้ AI ไม่วาดห้องใหม่ทั้งหมด
+    base_prompt = f"Interior design renovation of an existing {room_type} into {interior_style} style. "
+    base_prompt += f"STRICTLY MAINTAIN the original room's architecture, door/window positions, and floor layout. "
+    base_prompt += f"The current setup has {furniture_desc}. "
+    base_prompt += f"TASK: Only change the wall colors from {wall_color} to {interior_style} palette, and add decorative elements like plants or art in the existing spaces. "
+    base_prompt += f"Keep all existing furniture in their exact current positions but re-style their surfaces. "
+    base_prompt += f"Preserve the natural light coming from {natural_light_direction}. "
+    base_prompt += "Realistic photo, high quality, 8k, architectural photography, soft cinematic lighting."
 
     if custom_prompt:
         base_prompt += f" Additional requirements: {custom_prompt}"
