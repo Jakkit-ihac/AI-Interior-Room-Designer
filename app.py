@@ -34,13 +34,6 @@ st.markdown("""
     .stButton>button:hover {
         background-color: #0056b3;
     }
-    .reset-button>button {
-        background-color: #dc3545 !important;
-        margin-top: 10px;
-    }
-    .reset-button>button:hover {
-        background-color: #c82333 !important;
-    }
     .result-container {
         background-color: white;
         padding: 20px;
@@ -81,6 +74,8 @@ if 'recommendations' not in st.session_state:
     st.session_state['recommendations'] = None
 if 'current_image_url' not in st.session_state:
     st.session_state['current_image_url'] = None
+if 'last_uploaded_file' not in st.session_state:
+    st.session_state['last_uploaded_file'] = None
 
 # --- Helper Function: Upload Image to ImgBB ---
 def upload_to_imgbb(image_path):
@@ -107,16 +102,6 @@ def upload_to_imgbb(image_path):
 st.title("🏠 AI Interior Room Designer")
 st.write("วิเคราะห์ห้องแบบละเอียดและออกแบบใหม่โดยรักษาโครงสร้างเดิม 100%")
 
-# ปุ่มล้างข้อมูลย้ายมาไว้ด้านบนสุดเพื่อให้เห็นชัดเจน
-col_title, col_reset = st.columns([4, 1])
-with col_reset:
-    st.markdown('<div class="reset-button">', unsafe_allow_html=True)
-    if st.button("🔄 ล้างข้อมูลและเริ่มใหม่"):
-        for key in st.session_state.keys():
-            st.session_state[key] = None
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
 st.markdown("---")
 
 col1, col2 = st.columns([1, 1], gap="large")
@@ -124,6 +109,14 @@ col1, col2 = st.columns([1, 1], gap="large")
 with col1:
     st.header("1. อัปโหลดรูปห้อง")
     uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
+    
+    # หากมีการอัปโหลดไฟล์ใหม่ ให้ล้างสถานะเดิมเพื่อให้เริ่มวิเคราะห์ใหม่ได้
+    if uploaded_file and uploaded_file != st.session_state['last_uploaded_file']:
+        st.session_state['analysis'] = None
+        st.session_state['result_image'] = None
+        st.session_state['recommendations'] = None
+        st.session_state['current_image_url'] = None
+        st.session_state['last_uploaded_file'] = uploaded_file
     
     if uploaded_file:
         img = Image.open(uploaded_file)
@@ -211,3 +204,11 @@ if st.session_state['result_image']:
         
     # ปุ่มดาวน์โหลด
     st.markdown(f'<a href="{st.session_state["result_image"]}" target="_blank"><button style="width:100%; border-radius:8px; height:3em; background-color:#28a745; color:white; font-weight:bold; border:none; cursor:pointer;">📥 ดาวน์โหลดรูปภาพความละเอียดสูง</button></a>', unsafe_allow_html=True)
+
+# Sidebar for Reset (ย้ายมาไว้ใน Sidebar แบบเงียบๆ เผื่อกรณีฉุกเฉิน)
+with st.sidebar:
+    st.title("Settings")
+    if st.button("ล้างข้อมูลทั้งหมด"):
+        for key in st.session_state.keys():
+            st.session_state[key] = None
+        st.rerun()
