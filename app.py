@@ -34,6 +34,13 @@ st.markdown("""
     .stButton>button:hover {
         background-color: #0056b3;
     }
+    .reset-button>button {
+        background-color: #dc3545 !important;
+        margin-top: 10px;
+    }
+    .reset-button>button:hover {
+        background-color: #c82333 !important;
+    }
     .result-container {
         background-color: white;
         padding: 20px;
@@ -100,6 +107,18 @@ def upload_to_imgbb(image_path):
 st.title("🏠 AI Interior Room Designer")
 st.write("วิเคราะห์ห้องแบบละเอียดและออกแบบใหม่โดยรักษาโครงสร้างเดิม 100%")
 
+# ปุ่มล้างข้อมูลย้ายมาไว้ด้านบนสุดเพื่อให้เห็นชัดเจน
+col_title, col_reset = st.columns([4, 1])
+with col_reset:
+    st.markdown('<div class="reset-button">', unsafe_allow_html=True)
+    if st.button("🔄 ล้างข้อมูลและเริ่มใหม่"):
+        for key in st.session_state.keys():
+            st.session_state[key] = None
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown("---")
+
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
@@ -128,13 +147,14 @@ with col2:
         analysis = st.session_state['analysis']
         
         # แสดงข้อมูลที่วิเคราะห์ได้แบบละเอียด
-        st.subheader("📝 รายละเอียดห้องที่ตรวจพบ (Deep Structural JSON)")
+        st.subheader("📝 รายละเอียดห้องที่ตรวจพบ")
         
         # ดึงข้อมูลหลักมาแสดงใน UI แบบสรุป
         metadata = analysis.get("room_metadata", {})
         st.markdown(f'<div class="analysis-box"><b>ประเภทห้อง:</b> {metadata.get("room_type", "unknown")} | <b>มุมมอง:</b> {metadata.get("camera_perspective", "unknown")}</div>', unsafe_allow_html=True)
         
-        with st.expander("🔍 ดูโครงสร้าง JSON แบบละเอียด (Deep Structural Data)", expanded=True):
+        # ซ่อน JSON ไว้ใน Expander ที่ปิดอยู่เป็นค่าเริ่มต้น (expanded=False) เพื่อไม่ให้รบกวน
+        with st.expander("🔍 ดูโครงสร้าง JSON แบบละเอียด (Deep Structural Data)", expanded=False):
             st.json(analysis)
         
         st.markdown("---")
@@ -191,11 +211,3 @@ if st.session_state['result_image']:
         
     # ปุ่มดาวน์โหลด
     st.markdown(f'<a href="{st.session_state["result_image"]}" target="_blank"><button style="width:100%; border-radius:8px; height:3em; background-color:#28a745; color:white; font-weight:bold; border:none; cursor:pointer;">📥 ดาวน์โหลดรูปภาพความละเอียดสูง</button></a>', unsafe_allow_html=True)
-
-# Sidebar for Reset
-with st.sidebar:
-    st.title("Settings")
-    if st.button("ล้างข้อมูลและเริ่มใหม่"):
-        for key in st.session_state.keys():
-            st.session_state[key] = None
-        st.rerun()
