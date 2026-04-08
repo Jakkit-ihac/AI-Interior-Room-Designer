@@ -40,6 +40,13 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         margin-top: 20px;
     }
+    .analysis-box {
+        background-color: #e9ecef;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 5px solid #007bff;
+        margin-bottom: 15px;
+    }
     .section-header {
         color: #333;
         border-bottom: 2px solid #007bff;
@@ -50,7 +57,6 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- Session State Management ---
-# ใช้ Session State เพื่อเก็บข้อมูลให้คงอยู่แม้จะมีการเปลี่ยนสไตล์
 if 'analysis' not in st.session_state:
     st.session_state['analysis'] = None
 if 'result_image' not in st.session_state:
@@ -83,7 +89,7 @@ def upload_to_imgbb(image_path):
 
 # --- Main UI ---
 st.title("🏠 AI Interior Room Designer")
-st.write("ออกแบบห้องใหม่โดยรักษาโครงสร้างเดิมของคุณ 100%")
+st.write("วิเคราะห์ห้องแบบละเอียดและออกแบบใหม่โดยรักษาโครงสร้างเดิม 100%")
 
 col1, col2 = st.columns([1, 1], gap="large")
 
@@ -98,8 +104,8 @@ with col1:
         temp_path = "temp_room.jpg"
         img.save(temp_path)
         
-        if st.button("🔍 วิเคราะห์โครงสร้างห้อง"):
-            with st.spinner("AI กำลังวิเคราะห์ห้อง..."):
+        if st.button("🔍 เริ่มวิเคราะห์ห้องแบบละเอียด (Deep Analysis)"):
+            with st.spinner("AI กำลังวิเคราะห์ทุกรายละเอียดในห้องของคุณ..."):
                 analysis = analyze_room(temp_path)
                 st.session_state['analysis'] = analysis
                 # อัปโหลดรูปเพื่อเตรียมส่งให้ Replicate
@@ -107,19 +113,25 @@ with col1:
                 st.success("วิเคราะห์เสร็จสมบูรณ์!")
 
 with col2:
-    st.header("2. เลือกสไตล์การตกแต่ง")
+    st.header("2. ผลการวิเคราะห์และเลือกสไตล์")
     
     if st.session_state['analysis']:
         analysis = st.session_state['analysis']
         
-        # แสดงข้อมูลที่วิเคราะห์ได้
-        with st.expander("ดูข้อมูลที่ AI วิเคราะห์ได้"):
-            st.write(f"**ประเภทห้อง:** {analysis.get('room_type', 'unknown')}")
-            st.write(f"**เฟอร์นิเจอร์เดิม:** {', '.join(analysis.get('current_furniture', []))}")
-            st.write(f"**โครงสร้าง:** {analysis.get('architectural_features', 'unknown')}")
+        # แสดงข้อมูลที่วิเคราะห์ได้แบบละเอียด
+        st.subheader("📝 รายละเอียดห้องที่ตรวจพบ")
+        st.markdown(f'<div class="analysis-box"><b>ประเภทห้อง:</b> {analysis.get("room_type", "unknown")}</div>', unsafe_allow_html=True)
         
+        with st.expander("🔍 ดูคำบรรยายห้องแบบละเอียด (Deep Description)", expanded=True):
+            st.write(analysis.get("detailed_description", "No detailed description available."))
+            st.write("---")
+            st.write(f"**เฟอร์นิเจอร์และตำแหน่ง:** {', '.join(analysis.get('current_furniture', []))}")
+            st.write(f"**โครงสร้างและวัสดุ:** {analysis.get('architectural_features', 'unknown')}")
+            st.write(f"**แสงและบรรยากาศ:** {analysis.get('natural_light_and_lighting', 'unknown')}")
+        
+        st.markdown("---")
         interior_style = st.selectbox(
-            "เลือกสไตล์ที่ต้องการ",
+            "เลือกสไตล์การออกแบบใหม่",
             ["Minimalist", "Modern Luxury", "Industrial", "Scandinavian", "Japanese Zen", "Bohemian"]
         )
         
@@ -127,14 +139,14 @@ with col2:
         
         if st.button("✨ เริ่มออกแบบห้องใหม่"):
             with st.spinner("AI กำลังวาดรูปใหม่ (อาจใช้เวลา 30-60 วินาที)..."):
-                # สร้าง Prompt
+                # สร้าง Prompt โดยใช้ข้อมูลที่วิเคราะห์ได้ทั้งหมด
                 design_prompt = build_design_prompt(
                     analysis.get("room_type", "room"),
                     interior_style,
                     analysis.get("current_furniture", []),
-                    analysis.get("wall_color", "white"),
-                    analysis.get("natural_light_direction", "unknown"),
-                    custom_prompt
+                    analysis.get("wall_color_and_texture", "white"),
+                    analysis.get("natural_light_and_lighting", "unknown"),
+                    f"{custom_prompt}. {analysis.get('detailed_description', '')}"
                 )
                 
                 # สร้างรูปภาพ (ส่ง URL รูปต้นฉบับไปด้วยเพื่อทำ Image-to-Image)

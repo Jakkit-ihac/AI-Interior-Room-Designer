@@ -6,8 +6,8 @@ import re
 
 def analyze_room(image_path: str) -> dict:
     """
-    ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องและดึงข้อมูลที่เกี่ยวข้อง
-    เพื่อใช้เป็นข้อมูลในการรักษาเค้าโครงเดิม (Structural Preservation)
+    ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องแบบละเอียดสูงสุด (Deep Vision Analysis)
+    เพื่อดึงข้อมูลเชิงลึกของโครงสร้าง วัสดุ และตำแหน่งสิ่งของทุกชิ้น
     """
     api_key = os.environ.get("GOOGLE_API_KEY")
     default_response = {
@@ -17,7 +17,8 @@ def analyze_room(image_path: str) -> dict:
         "wall_color": "white",
         "natural_light_direction": "unknown",
         "architectural_features": "standard room",
-        "spatial_layout_description": "Standard room layout"
+        "detailed_description": "A standard room with basic furniture.",
+        "spatial_layout_analysis": "Standard layout with furniture placed along the walls."
     }
     
     if not api_key:
@@ -29,27 +30,27 @@ def analyze_room(image_path: str) -> dict:
         model = genai.GenerativeModel("gemini-2.5-flash")
 
         prompt = """
-        Analyze this room image in extreme detail for an interior design task. 
-        I need to know the exact layout to maintain the original structure.
+        As an expert interior architect and vision AI, analyze this room image with extreme precision. 
+        I need a comprehensive breakdown of EVERYTHING in the room to ensure the redesign maintains the exact structural integrity.
         
-        Identify:
-        1. Room type (e.g., Living Room, Bedroom, etc.)
-        2. List of existing furniture with their EXACT relative positions (e.g., 'bed in the center', 'desk on the left')
-        3. Approximate free space (e.g., 'a lot', 'some', 'limited')
-        4. Dominant wall color and texture
-        5. Natural light direction and source (e.g., 'large window on the right')
-        6. Key architectural features (e.g., 'slanted ceiling', 'door on the back wall')
-        7. A detailed description of the room's geometry to help an AI artist recreate it exactly.
+        Please identify and describe in detail:
+        1. Room Type: Primary function of the space.
+        2. Furniture Inventory & Mapping: List every piece of furniture, its style, material, and EXACT coordinate-like position (e.g., 'Large wooden bed occupies the center-back area', 'Black office chair at the bottom-right corner').
+        3. Architectural DNA: Describe walls, floor material (e.g., 'white ceramic tiles'), ceiling type, and any fixed elements like doors, windows, or pillars with their exact locations.
+        4. Lighting & Atmosphere: Direction of natural light, types of artificial lights present, and the current 'mood' of the room.
+        5. Spatial Geometry: A narrative description of the room's shape, dimensions, and how objects are distributed.
+        6. Clutter & Usage: Identify areas with many small items or specific usage zones (e.g., 'music corner with a keyboard on the left').
 
         Provide the output strictly in a valid JSON format like:
         {
             "room_type": "string",
-            "current_furniture": ["string", "string"],
-            "free_space": "string",
-            "wall_color": "string",
-            "natural_light_direction": "string",
+            "current_furniture": ["item 1 with position", "item 2 with position"],
+            "free_space": "string description",
+            "wall_color_and_texture": "string",
+            "natural_light_and_lighting": "string",
             "architectural_features": "string",
-            "spatial_layout_description": "string"
+            "detailed_description": "A very long, detailed paragraph describing every detail of the room as if explaining it to a blind person.",
+            "spatial_layout_analysis": "A technical description of the room's geometry and object placement."
         }
         Do not include any other text or explanation outside the JSON.
         """
