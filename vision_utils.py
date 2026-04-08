@@ -6,7 +6,7 @@ import re
 
 def analyze_room(image_path: str) -> dict:
     """
-    ใช้ Google Gemini 1.5 Flash เพื่อวิเคราะห์รูปภาพห้องและดึงข้อมูลที่เกี่ยวข้อง
+    ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องและดึงข้อมูลที่เกี่ยวข้อง
     """
     api_key = os.environ.get("GOOGLE_API_KEY")
     default_response = {
@@ -23,8 +23,8 @@ def analyze_room(image_path: str) -> dict:
 
     try:
         genai.configure(api_key=api_key)
-        # ใช้โมเดล gemini-1.5-flash ที่เสถียรกว่าในการวิเคราะห์ภาพ
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        # ใช้โมเดล gemini-2.5-flash ล่าสุดเพื่อความแม่นยำสูงสุด
+        model = genai.GenerativeModel("gemini-2.5-flash")
 
         prompt = """
         Analyze this room image in detail for an interior design task. Identify:

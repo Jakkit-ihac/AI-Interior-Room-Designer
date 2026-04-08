@@ -30,8 +30,8 @@ def recommend_furniture_and_palette(design_prompt: str) -> str:
         return "Please set GOOGLE_API_KEY in Streamlit Secrets to get design recommendations."
 
     genai.configure(api_key=api_key)
-    # ใช้โมเดล gemini-1.5-flash ซึ่งมีความเสถียรสูงกว่าในปัจจุบัน
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    # ใช้โมเดล gemini-2.5-flash ล่าสุดเพื่อประสิทธิภาพสูงสุด
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
     prompt = f"""
     You are an AI interior designer. Based on this interior design prompt: "{design_prompt}"
