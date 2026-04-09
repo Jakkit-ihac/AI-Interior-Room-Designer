@@ -131,7 +131,8 @@ with col1:
             img = Image.open(uploaded_file)
             st.session_state['image_dims'] = img.size
             
-            temp_path = f"temp_{int(time.time())}.jpg"
+            # ใช้ชื่อไฟล์คงที่สำหรับรูปปัจจุบันเพื่อให้หาง่าย
+            temp_path = "current_room_image.jpg"
             img.save(temp_path)
             st.session_state['temp_path'] = temp_path
     
@@ -142,14 +143,19 @@ with col1:
         selected_room_type = st.selectbox("ระบุประเภทห้อง (เพื่อความแม่นยำ)", room_type_options)
         
         if st.button("🔍 เริ่มวิเคราะห์ห้องแบบละเอียด (Deep Analysis)"):
-            with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้องแบบละเอียดสูงสุด..."):
-                analysis = analyze_room(st.session_state['temp_path'])
-                if "room_metadata" in analysis:
-                    analysis["room_metadata"]["room_type"] = selected_room_type
-                
-                st.session_state['analysis'] = analysis
-                st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['temp_path'])
-                st.success("วิเคราะห์เสร็จสมบูรณ์!")
+            # ตรวจสอบว่าไฟล์มีอยู่จริงก่อนวิเคราะห์
+            if st.session_state['temp_path'] and os.path.exists(st.session_state['temp_path']):
+                with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้องแบบละเอียดสูงสุด..."):
+                    analysis = analyze_room(st.session_state['temp_path'])
+                    if "room_metadata" in analysis:
+                        analysis["room_metadata"]["room_type"] = selected_room_type
+                    
+                    st.session_state['analysis'] = analysis
+                    # อัปโหลดรูปและเก็บ URL ไว้ถาวรใน Session
+                    st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['temp_path'])
+                    st.success("วิเคราะห์เสร็จสมบูรณ์!")
+            else:
+                st.error("ไม่พบไฟล์รูปภาพต้นฉบับ กรุณาลองอัปโหลดใหม่อีกครั้ง")
 
 with col2:
     st.header("2. ผลการวิเคราะห์และเลือกสไตล์")
