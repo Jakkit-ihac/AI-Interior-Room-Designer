@@ -112,7 +112,6 @@ with col1:
     st.header("1. อัปโหลดรูปห้อง")
     uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
     
-    # หากมีการอัปโหลดไฟล์ใหม่ ให้ล้างสถานะเดิมเพื่อให้เริ่มวิเคราะห์ใหม่ได้
     if uploaded_file and uploaded_file != st.session_state['last_uploaded_file']:
         st.session_state['analysis'] = None
         st.session_state['result_image'] = None
@@ -120,9 +119,8 @@ with col1:
         st.session_state['current_image_url'] = None
         st.session_state['last_uploaded_file'] = uploaded_file
         
-        # เก็บขนาดรูปภาพต้นฉบับ
         img = Image.open(uploaded_file)
-        st.session_state['image_dims'] = img.size # (width, height)
+        st.session_state['image_dims'] = img.size
     
     if uploaded_file:
         img = Image.open(uploaded_file)
@@ -131,11 +129,18 @@ with col1:
         temp_path = "temp_room.jpg"
         img.save(temp_path)
         
+        # เพิ่มตัวเลือกประเภทห้องเพื่อให้ผู้ใช้เลือกเองได้หาก AI วิเคราะห์ผิด
+        room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
+        selected_room_type = st.selectbox("ระบุประเภทห้อง (เพื่อความแม่นยำ)", room_type_options)
+        
         if st.button("🔍 เริ่มวิเคราะห์ห้องแบบละเอียด (Deep Analysis)"):
-            with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้องแบบละเอียดสูงสุด (Deep Structural Analysis)..."):
+            with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้องแบบละเอียดสูงสุด..."):
                 analysis = analyze_room(temp_path)
+                # บังคับประเภทห้องตามที่ผู้ใช้เลือก
+                if "room_metadata" in analysis:
+                    analysis["room_metadata"]["room_type"] = selected_room_type
+                
                 st.session_state['analysis'] = analysis
-                # อัปโหลดรูปเพื่อเตรียมส่งให้ Replicate
                 st.session_state['current_image_url'] = upload_to_imgbb(temp_path)
                 st.success("วิเคราะห์เสร็จสมบูรณ์!")
 
@@ -145,14 +150,10 @@ with col2:
     if st.session_state['analysis']:
         analysis = st.session_state['analysis']
         
-        # แสดงข้อมูลที่วิเคราะห์ได้แบบละเอียด
         st.subheader("📝 รายละเอียดห้องที่ตรวจพบ")
-        
-        # ดึงข้อมูลหลักมาแสดงใน UI แบบสรุป
         metadata = analysis.get("room_metadata", {})
         st.markdown(f'<div class="analysis-box"><b>ประเภทห้อง:</b> {metadata.get("room_type", "unknown")} | <b>มุมมอง:</b> {metadata.get("camera_perspective", "unknown")}</div>', unsafe_allow_html=True)
         
-        # ซ่อน JSON ไว้ใน Expander ที่ปิดอยู่เป็นค่าเริ่มต้น (expanded=False) เพื่อไม่ให้รบกวน
         with st.expander("🔍 ดูโครงสร้าง JSON แบบละเอียด (Deep Structural Data)", expanded=False):
             st.json(analysis)
         
@@ -166,7 +167,6 @@ with col2:
         
         if st.button("✨ เริ่มออกแบบห้องใหม่"):
             with st.spinner("AI กำลังวาดรูปใหม่ (อาจใช้เวลา 30-60 วินาที)..."):
-                # สร้าง Prompt โดยใช้ข้อมูลที่วิเคราะห์ได้ทั้งหมด
                 detailed_narrative = analysis.get("detailed_narrative", "")
                 furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
                 
@@ -179,16 +179,15 @@ with col2:
                     f"{custom_prompt}. {detailed_narrative}"
                 )
                 
-                # สร้างรูปภาพ (ส่ง URL รูปต้นฉบับ และขนาดภาพไปด้วย)
                 width, height = st.session_state['image_dims']
                 result_image_url = generate_design(design_prompt, st.session_state['current_image_url'], width, height)
                 
-                # สร้างคำแนะนำ
-                recommendations = recommend_furniture_and_palette(design_prompt)
-                
-                st.session_state['result_image'] = result_image_url
-                st.session_state['recommendations'] = recommendations
-                st.rerun()
+                if result_image_url:
+                    st.session_state['result_image'] = result_image_url
+                    st.session_state['recommendations'] = recommend_furniture_and_palette(design_prompt)
+                    st.rerun()
+                else:
+                    st.error("ไม่สามารถสร้างรูปภาพได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง")
     else:
         st.info("กรุณาอัปโหลดรูปภาพและกดปุ่มวิเคราะห์ห้องก่อน")
 
@@ -201,6 +200,7 @@ if st.session_state['result_image']:
     with res_col1:
         st.image(uploaded_file, caption="ห้องเดิม", use_container_width=True)
     with res_col2:
+        # ตรวจสอบว่า URL รูปภาพใช้งานได้จริง
         st.image(st.session_state['result_image'], caption=f"ห้องใหม่สไตล์ {interior_style}", use_container_width=True)
     
     if st.session_state['recommendations']:
@@ -209,7 +209,6 @@ if st.session_state['result_image']:
         st.write(st.session_state['recommendations'])
         st.markdown('</div>', unsafe_allow_html=True)
         
-    # ปุ่มดาวน์โหลด
     st.markdown(f'<a href="{st.session_state["result_image"]}" target="_blank"><button style="width:100%; border-radius:8px; height:3em; background-color:#28a745; color:white; font-weight:bold; border:none; cursor:pointer;">📥 ดาวน์โหลดรูปภาพความละเอียดสูง</button></a>', unsafe_allow_html=True)
 
 # Sidebar for Reset
