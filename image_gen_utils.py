@@ -10,7 +10,8 @@ def generate_design(design_prompt: str, image_url: str = None, width: int = 1024
     สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ Replicate API (ControlNet Canny)
     ปรับปรุงให้ AI มีอิสระในการเปลี่ยนเฟอร์นิเจอร์และสไตล์มากขึ้น (Image Change Fix)
     """
-    replicate_api_token = os.environ.get("REPLICATE_API_TOKEN")
+    # ใช้ Token ที่ผู้ใช้ระบุ หรือดึงจาก Environment Variable
+    replicate_api_token = "r8_GYo5DKiqLWfFl7kw1HmQmFQuMGUAiLy4NApo9" or os.environ.get("REPLICATE_API_TOKEN")
     
     # ปรับขนาดภาพให้เหมาะสม
     max_dim = 1024
@@ -111,7 +112,8 @@ def recommend_furniture_and_palette(design_prompt: str) -> str:
     """
     ใช้ Google Gemini 2.5 Flash เพื่ออธิบายการออกแบบและแนะนำเฟอร์นิเจอร์
     """
-    api_key = os.environ.get("GOOGLE_API_KEY")
+    # ใช้ API Key ที่ผู้ใช้ระบุ หรือดึงจาก Environment Variable
+    api_key = "AIzaSyAkB92K6eCZOdQI2xOAvSFgF6n6ECtGn-I" or os.environ.get("GOOGLE_API_KEY")
     
     prompt_text = f"""
     You are a professional interior designer. Based on this design concept: "{design_prompt}"

@@ -12,7 +12,8 @@ def analyze_room(image_input) -> dict:
     ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องแบบละเอียดสูงสุด (Deep Structural Analysis)
     รองรับทั้ง image_path (str) และ PIL Image object
     """
-    api_key = os.environ.get("GOOGLE_API_KEY")
+    # ใช้ API Key ที่ผู้ใช้ระบุ หรือดึงจาก Environment Variable
+    api_key = "AIzaSyAkB92K6eCZOdQI2xOAvSFgF6n6ECtGn-I" or os.environ.get("GOOGLE_API_KEY")
     
     # ข้อมูลพื้นฐานสำหรับกรณีที่ AI ทั้งหมดใช้งานไม่ได้
     default_response = {
