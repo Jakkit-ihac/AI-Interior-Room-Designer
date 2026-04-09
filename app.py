@@ -66,7 +66,6 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- Session State Management ---
-# ใช้ฟังก์ชันเพื่อกำหนดค่าเริ่มต้นให้ Session State อย่างปลอดภัย
 def init_session():
     if 'analysis' not in st.session_state:
         st.session_state['analysis'] = None
@@ -80,6 +79,8 @@ def init_session():
         st.session_state['last_uploaded_file_name'] = None
     if 'image_dims' not in st.session_state:
         st.session_state['image_dims'] = (1024, 768)
+    if 'temp_path' not in st.session_state:
+        st.session_state['temp_path'] = None
 
 init_session()
 
@@ -88,6 +89,8 @@ def upload_to_imgbb(image_path):
     """
     อัปโหลดรูปภาพไปยัง ImgBB เพื่อรับ URL สาธารณะสำหรับส่งให้ Replicate API
     """
+    if not image_path or not os.path.exists(image_path):
+        return None
     try:
         # ใช้ API Key สาธารณะ (กรุณาเปลี่ยนเป็นของคุณเองเพื่อความเสถียร)
         api_key = "c8798933668868868868868868868868" # Placeholder
@@ -116,9 +119,9 @@ with col1:
     st.header("1. อัปโหลดรูปห้อง")
     uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
     
-    # หากมีการอัปโหลดไฟล์ใหม่ (เช็คจากชื่อไฟล์) ให้ล้างสถานะเดิม
     if uploaded_file:
         if uploaded_file.name != st.session_state['last_uploaded_file_name']:
+            # ล้างสถานะเฉพาะเมื่อเปลี่ยนไฟล์ใหม่จริงๆ
             st.session_state['analysis'] = None
             st.session_state['result_image'] = None
             st.session_state['recommendations'] = None
@@ -128,15 +131,13 @@ with col1:
             img = Image.open(uploaded_file)
             st.session_state['image_dims'] = img.size
             
-            # บันทึกไฟล์ชั่วคราวเพื่อวิเคราะห์
-            temp_path = "temp_room.jpg"
+            temp_path = f"temp_{int(time.time())}.jpg"
             img.save(temp_path)
             st.session_state['temp_path'] = temp_path
     
-    if uploaded_file:
+    if uploaded_file and st.session_state['temp_path']:
         st.image(uploaded_file, caption="รูปห้องต้นฉบับ", use_container_width=True)
         
-        # เพิ่มตัวเลือกประเภทห้อง
         room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
         selected_room_type = st.selectbox("ระบุประเภทห้อง (เพื่อความแม่นยำ)", room_type_options)
         
@@ -147,7 +148,6 @@ with col1:
                     analysis["room_metadata"]["room_type"] = selected_room_type
                 
                 st.session_state['analysis'] = analysis
-                # อัปโหลดรูปและเก็บ URL ไว้ถาวรใน Session
                 st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['temp_path'])
                 st.success("วิเคราะห์เสร็จสมบูรณ์!")
 
@@ -173,13 +173,13 @@ with col2:
         custom_prompt = st.text_area("คำแนะนำเพิ่มเติม (ถ้ามี)", placeholder="เช่น 'เน้นสีขาวและไม้', 'เพิ่มต้นไม้เยอะๆ'")
         
         if st.button("✨ เริ่มออกแบบห้องใหม่"):
-            # ตรวจสอบว่ามี URL รูปภาพต้นฉบับหรือไม่ (ถ้าไม่มีให้ลองอัปโหลดใหม่)
+            # ตรวจสอบความพร้อมของข้อมูลก่อนเจน
             if not st.session_state['current_image_url']:
                 with st.spinner("กำลังเตรียมรูปภาพต้นฉบับ..."):
                     st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['temp_path'])
             
             if st.session_state['current_image_url']:
-                with st.spinner("AI กำลังวาดรูปใหม่ (อาจใช้เวลา 30-60 วินาที)..."):
+                with st.spinner(f"AI กำลังวาดรูปใหม่สไตล์ {interior_style}..."):
                     detailed_narrative = analysis.get("detailed_narrative", "")
                     furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
                     
@@ -216,7 +216,6 @@ if st.session_state['result_image']:
         if uploaded_file:
             st.image(uploaded_file, caption="ห้องเดิม", use_container_width=True)
     with res_col2:
-        # แสดงรูปภาพผลลัพธ์
         st.image(st.session_state['result_image'], caption=f"ห้องใหม่สไตล์ {interior_style}", use_container_width=True)
     
     if st.session_state['recommendations']:
