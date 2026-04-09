@@ -5,6 +5,7 @@ import requests
 import base64
 import time
 import json
+import io
 from vision_utils import analyze_room
 from prompt_utils import build_design_prompt
 from image_gen_utils import generate_design, recommend_furniture_and_palette
@@ -79,30 +80,29 @@ def init_session():
         st.session_state['last_uploaded_file_name'] = None
     if 'image_dims' not in st.session_state:
         st.session_state['image_dims'] = (1024, 768)
-    if 'temp_path' not in st.session_state:
-        st.session_state['temp_path'] = None
+    if 'image_bytes' not in st.session_state:
+        st.session_state['image_bytes'] = None
 
 init_session()
 
 # --- Helper Function: Upload Image to ImgBB ---
-def upload_to_imgbb(image_path):
+def upload_to_imgbb(image_bytes):
     """
     อัปโหลดรูปภาพไปยัง ImgBB เพื่อรับ URL สาธารณะสำหรับส่งให้ Replicate API
     """
-    if not image_path or not os.path.exists(image_path):
+    if not image_bytes:
         return None
     try:
         # ใช้ API Key สาธารณะ (กรุณาเปลี่ยนเป็นของคุณเองเพื่อความเสถียร)
         api_key = "c8798933668868868868868868868868" # Placeholder
-        with open(image_path, "rb") as file:
-            url = "https://api.imgbb.com/1/upload"
-            payload = {
-                "key": api_key,
-                "image": base64.b64encode(file.read()),
-            }
-            res = requests.post(url, payload, timeout=15)
-            if res.status_code == 200:
-                return res.json()["data"]["url"]
+        url = "https://api.imgbb.com/1/upload"
+        payload = {
+            "key": api_key,
+            "image": base64.b64encode(image_bytes),
+        }
+        res = requests.post(url, payload, timeout=15)
+        if res.status_code == 200:
+            return res.json()["data"]["url"]
     except Exception as e:
         st.error(f"Image upload failed: {e}")
     return None
@@ -128,34 +128,34 @@ with col1:
             st.session_state['current_image_url'] = None
             st.session_state['last_uploaded_file_name'] = uploaded_file.name
             
-            img = Image.open(uploaded_file)
-            st.session_state['image_dims'] = img.size
+            # เก็บข้อมูลรูปภาพในรูปแบบ Bytes
+            img_bytes = uploaded_file.getvalue()
+            st.session_state['image_bytes'] = img_bytes
             
-            # ใช้ชื่อไฟล์คงที่สำหรับรูปปัจจุบันเพื่อให้หาง่าย
-            temp_path = "current_room_image.jpg"
-            img.save(temp_path)
-            st.session_state['temp_path'] = temp_path
+            img = Image.open(io.BytesIO(img_bytes))
+            st.session_state['image_dims'] = img.size
     
-    if uploaded_file and st.session_state['temp_path']:
-        st.image(uploaded_file, caption="รูปห้องต้นฉบับ", use_container_width=True)
+    if st.session_state['image_bytes']:
+        st.image(st.session_state['image_bytes'], caption="รูปห้องต้นฉบับ", use_container_width=True)
         
         room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
         selected_room_type = st.selectbox("ระบุประเภทห้อง (เพื่อความแม่นยำ)", room_type_options)
         
         if st.button("🔍 เริ่มวิเคราะห์ห้องแบบละเอียด (Deep Analysis)"):
-            # ตรวจสอบว่าไฟล์มีอยู่จริงก่อนวิเคราะห์
-            if st.session_state['temp_path'] and os.path.exists(st.session_state['temp_path']):
-                with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้องแบบละเอียดสูงสุด..."):
-                    analysis = analyze_room(st.session_state['temp_path'])
-                    if "room_metadata" in analysis:
-                        analysis["room_metadata"]["room_type"] = selected_room_type
-                    
-                    st.session_state['analysis'] = analysis
-                    # อัปโหลดรูปและเก็บ URL ไว้ถาวรใน Session
-                    st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['temp_path'])
-                    st.success("วิเคราะห์เสร็จสมบูรณ์!")
-            else:
-                st.error("ไม่พบไฟล์รูปภาพต้นฉบับ กรุณาลองอัปโหลดใหม่อีกครั้ง")
+            with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้องแบบละเอียดสูงสุด..."):
+                # สร้างไฟล์ชั่วคราวจาก Bytes เพื่อส่งให้ analyze_room
+                temp_path = "temp_analysis_image.jpg"
+                with open(temp_path, "wb") as f:
+                    f.write(st.session_state['image_bytes'])
+                
+                analysis = analyze_room(temp_path)
+                if "room_metadata" in analysis:
+                    analysis["room_metadata"]["room_type"] = selected_room_type
+                
+                st.session_state['analysis'] = analysis
+                # อัปโหลดรูปและเก็บ URL ไว้ถาวรใน Session
+                st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['image_bytes'])
+                st.success("วิเคราะห์เสร็จสมบูรณ์!")
 
 with col2:
     st.header("2. ผลการวิเคราะห์และเลือกสไตล์")
@@ -182,7 +182,7 @@ with col2:
             # ตรวจสอบความพร้อมของข้อมูลก่อนเจน
             if not st.session_state['current_image_url']:
                 with st.spinner("กำลังเตรียมรูปภาพต้นฉบับ..."):
-                    st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['temp_path'])
+                    st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['image_bytes'])
             
             if st.session_state['current_image_url']:
                 with st.spinner(f"AI กำลังวาดรูปใหม่สไตล์ {interior_style}..."):
@@ -219,8 +219,8 @@ if st.session_state['result_image']:
     
     res_col1, res_col2 = st.columns(2)
     with res_col1:
-        if uploaded_file:
-            st.image(uploaded_file, caption="ห้องเดิม", use_container_width=True)
+        if st.session_state['image_bytes']:
+            st.image(st.session_state['image_bytes'], caption="ห้องเดิม", use_container_width=True)
     with res_col2:
         st.image(st.session_state['result_image'], caption=f"ห้องใหม่สไตล์ {interior_style}", use_container_width=True)
     
