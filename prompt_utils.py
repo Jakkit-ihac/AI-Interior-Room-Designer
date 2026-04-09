@@ -27,7 +27,8 @@ def build_design_prompt(
     
     # คำสั่งหลัก: เปลี่ยนเฟอร์นิเจอร์และเพิ่มของตกแต่ง
     base_prompt += f"TASK: Replace existing furniture with new {interior_style} style pieces in the SAME POSITIONS. "
-    base_prompt += "ADD decorative elements: wall art, indoor plants, stylish rugs, and decorative lighting fixtures to enhance the space. "    base_prompt += f"Update the color palette and textures to match {interior_style} for this {room_type} while keeping the room\'s geometry identical. "
+    base_prompt += "ADD decorative elements: wall art, indoor plants, stylish rugs, and decorative lighting fixtures to enhance the space. "
+    base_prompt += f"Update the color palette and textures to match {interior_style} for this {room_type} while keeping the room\\'s geometry identical. "
     
     # รายละเอียดแสงและคุณภาพของภาพ
     base_prompt += f"Maintain the natural light from {lighting_info}. "
