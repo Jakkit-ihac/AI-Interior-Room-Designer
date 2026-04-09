@@ -76,6 +76,8 @@ def init_session():
         st.session_state['recommendations'] = None
     if 'image_dims' not in st.session_state:
         st.session_state['image_dims'] = (1024, 768)
+    if 'scroll_to_results' not in st.session_state:
+        st.session_state['scroll_to_results'] = False
 
 init_session()
 
@@ -218,6 +220,7 @@ with col2:
                     if result_url:
                         st.session_state['result_image'] = result_url
                         st.session_state['recommendations'] = recommend_furniture_and_palette(design_prompt)
+                        st.session_state['scroll_to_results'] = True
                         st.rerun()
                     else:
                         st.error("ไม่สามารถสร้างรูปภาพได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง")
@@ -225,6 +228,17 @@ with col2:
                 st.error("❌ ไม่สามารถอัปโหลดรูปภาพต้นฉบับได้ (API Quota Exceeded) กรุณาลองใหม่อีกครั้งในภายหลัง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ตครับ")
     else:
         st.info("กรุณาอัปโหลดรูปภาพและกดปุ่มวิเคราะห์ห้องก่อน")
+
+# --- Auto-scroll to Results ---
+if st.session_state.get('scroll_to_results'):
+    st.session_state['scroll_to_results'] = False
+    st.markdown("""
+    <script>
+        setTimeout(function() {
+            window.scrollTo(0, document.body.scrollHeight);
+        }, 500);
+    </script>
+    """, unsafe_allow_html=True)
 
 # --- Results Display ---
 if st.session_state['result_image']:

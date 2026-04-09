@@ -19,15 +19,15 @@ def build_design_prompt(
     
     # สร้าง Prompt ที่เน้นการตกแต่ง (Styling-focused Prompt)
     # เน้นย้ำเรื่องการรักษาโครงสร้างเดิม (Structural Integrity)
-    base_prompt = f"Professional interior styling and decoration of an existing {room_type} into {interior_style} style. "
+    base_prompt = f"Design a {room_type} in {interior_style} style. The room is currently a {room_type}. "
+    base_prompt += f"Professional interior styling and decoration of this existing {room_type} into {interior_style} style. "
     base_prompt += "STRICTLY PRESERVE the original room's architecture: DO NOT move or change walls, windows, doors, floor, or ceiling. "
     base_prompt += f"The current room layout is: {detailed_narrative}. "
     base_prompt += f"Current furniture and positions: {furniture_desc}. "
     
     # คำสั่งหลัก: เปลี่ยนเฟอร์นิเจอร์และเพิ่มของตกแต่ง
     base_prompt += f"TASK: Replace existing furniture with new {interior_style} style pieces in the SAME POSITIONS. "
-    base_prompt += "ADD decorative elements: wall art, indoor plants, stylish rugs, and decorative lighting fixtures to enhance the space. "
-    base_prompt += f"Update the color palette and textures to match {interior_style} while keeping the room's geometry identical. "
+    base_prompt += "ADD decorative elements: wall art, indoor plants, stylish rugs, and decorative lighting fixtures to enhance the space. "    base_prompt += f"Update the color palette and textures to match {interior_style} for this {room_type} while keeping the room\'s geometry identical. "
     
     # รายละเอียดแสงและคุณภาพของภาพ
     base_prompt += f"Maintain the natural light from {lighting_info}. "
