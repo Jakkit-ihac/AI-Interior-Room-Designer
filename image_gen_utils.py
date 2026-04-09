@@ -8,7 +8,7 @@ import urllib.parse
 def generate_design(design_prompt: str, image_url: str = None, width: int = 1024, height: int = 768) -> str:
     """
     สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ Replicate API (ControlNet Canny)
-    หาก Replicate ล้มเหลว จะใช้ Pollinations.ai เป็นทางเลือกสำรองที่ชัวร์ 100%
+    ปรับปรุงให้ AI มีอิสระในการเปลี่ยนเฟอร์นิเจอร์และสไตล์มากขึ้น (Image Change Fix)
     """
     replicate_api_token = os.environ.get("REPLICATE_API_TOKEN")
     
@@ -26,7 +26,9 @@ def generate_design(design_prompt: str, image_url: str = None, width: int = 1024
 
     # ฟังก์ชันสำรอง (Fallback) ที่ทำงานได้ชัวร์
     def get_fallback_url():
-        encoded_prompt = urllib.parse.quote(f"Professional interior design, {design_prompt}, high quality, realistic, 8k")
+        # เพิ่มน้ำหนักสไตล์ใน Fallback ด้วย
+        enhanced_fallback_prompt = f"Professional interior design, {design_prompt}, high quality, realistic, 8k, architectural photography, completely new furniture, stylish decor"
+        encoded_prompt = urllib.parse.quote(enhanced_fallback_prompt)
         seed = random.randint(1, 1000000)
         return f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={new_width}&height={new_height}&seed={seed}&model=flux"
 
@@ -34,7 +36,7 @@ def generate_design(design_prompt: str, image_url: str = None, width: int = 1024
     if not replicate_api_token or not image_url:
         return get_fallback_url()
 
-    # ใช้โมเดล ControlNet Canny (SDXL) ที่เสถียร
+    # ใช้โมเดล ControlNet Canny (SDXL)
     model_id = "lucataco/controlnet-canny-sdxl:06d718b34f2142a3583d33967a99a209b9c2800291931057d25f9a21d78266ac"
     
     headers = {
@@ -42,15 +44,20 @@ def generate_design(design_prompt: str, image_url: str = None, width: int = 1024
         "Content-Type": "application/json"
     }
 
+    # เพิ่มน้ำหนักคำสั่งสไตล์ (Style Weighting) และลดความแข็งของโครงสร้าง
+    # เพื่อให้ AI กล้าเปลี่ยนเฟอร์นิเจอร์และของตกแต่ง
+    enhanced_prompt = f"Professional interior design, {design_prompt}, high quality, realistic, 8k, architectural photography, completely new furniture, stylish decor, vibrant colors, sharp focus"
+    
     payload = {
         "version": "06d718b34f2142a3583d33967a99a209b9c2800291931057d25f9a21d78266ac",
         "input": {
             "image": image_url,
-            "prompt": f"Professional interior design, {design_prompt}, high quality, realistic, 8k, architectural photography",
-            "negative_prompt": "low quality, blurry, distorted, messy, bad proportions, changed room structure, noise, grainy",
+            "prompt": enhanced_prompt,
+            "negative_prompt": "low quality, blurry, distorted, messy, bad proportions, noise, grainy, old furniture, unchanged room, same furniture",
             "num_inference_steps": 30,
-            "controlnet_conditioning_scale": 0.8,
-            "guidance_scale": 7.5,
+            # ลดค่าลงมาที่ 0.45 - 0.55 เพื่อให้ AI กล้าเปลี่ยนของในห้อง แต่ยังรักษาผนัง/หน้าต่างไว้
+            "controlnet_conditioning_scale": 0.5, 
+            "guidance_scale": 9.0, # เพิ่ม Guidance เพื่อให้ AI ทำตาม Prompt สไตล์มากขึ้น
             "width": new_width,
             "height": new_height
         }
@@ -65,7 +72,6 @@ def generate_design(design_prompt: str, image_url: str = None, width: int = 1024
         )
         
         if response.status_code not in [200, 201]:
-            print(f"Replicate API Error: {response.status_code} - {response.text}")
             return get_fallback_url()
             
         prediction = response.json()
@@ -92,7 +98,6 @@ def generate_design(design_prompt: str, image_url: str = None, width: int = 1024
                     return output
                 break
             elif status == "failed":
-                print(f"Replicate Prediction Failed: {res_json.get('error')}")
                 break
             
             time.sleep(3)
@@ -100,7 +105,6 @@ def generate_design(design_prompt: str, image_url: str = None, width: int = 1024
         return get_fallback_url()
 
     except Exception as e:
-        print(f"Replicate Exception: {e}")
         return get_fallback_url()
 
 def recommend_furniture_and_palette(design_prompt: str) -> str:
