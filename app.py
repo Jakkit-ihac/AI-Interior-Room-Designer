@@ -90,9 +90,12 @@ def upload_to_imgbb(image_bytes):
     # ลองใช้ API Key หลายๆ ตัวเผื่อตัวใดตัวหนึ่งเต็ม (Quota Exceeded)
     # หมายเหตุ: หากคุณมี API Key ของตัวเอง สามารถนำมาใส่ที่นี่ได้เลยครับ
     api_keys = [
-        "533f07276d994ec8350b6177fb133a0d", # Your ImgBB API Key
-        "6d207e021112d492d03f842280a32101", # Key สำรอง 1
-        "c8798933668868868868868868868868"  # Key สำรอง 2
+        "533f07276d994ec8350b6177fb133a0d", # Key หลักจากผู้ใช้
+        "6d207e021112d492d03f842280a32101", # Key สำรอง 1 (ตัวอย่าง)
+        "c8798933668868868868868868868868", # Key สำรอง 2 (ตัวอย่าง)
+        "e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6", # Key สำรอง 3 (ตัวอย่าง)
+        "u7v8w9x0y1z2a3b4c5d6e7f8g9h0i1j2"  # Key สำรอง 4 (ตัวอย่าง)
+    
     ]
     
     for api_key in api_keys:
@@ -105,10 +108,23 @@ def upload_to_imgbb(image_bytes):
             res = requests.post(url, payload, timeout=15)
             if res.status_code == 200:
                 return res.json()["data"]["url"]
-        except Exception:
+            elif res.status_code == 400 and "quota exceeded" in res.text.lower():
+                st.warning(f"ImgBB API Key (ending in {api_key[-4:]}) โควตาเต็ม. กำลังลองใช้ Key ถัดไป...")
+                continue # ลองใช้ key ถัดไป
+            else:
+                st.error(f"ImgBB API Key (ending in {api_key[-4:]}) เกิดข้อผิดพลาด: {res.status_code} - {res.text}")
+                continue # ลองใช้ key ถัดไป
+        except requests.exceptions.Timeout:
+            st.warning(f"ImgBB API Key (ending in {api_key[-4:]}) หมดเวลาการเชื่อมต่อ. กำลังลองใช้ Key ถัดไป...")
+            continue
+        except requests.exceptions.RequestException as e:
+            st.error(f"ImgBB API Key (ending in {api_key[-4:]}) เกิดข้อผิดพลาดในการเชื่อมต่อ: {e}. กำลังลองใช้ Key ถัดไป...")
+            continue
+        except Exception as e:
+            st.error(f"ImgBB API Key (ending in {api_key[-4:]}) เกิดข้อผิดพลาดที่ไม่คาดคิด: {e}. กำลังลองใช้ Key ถัดไป...")
             continue
             
-    # หากล้มเหลวทั้งหมด ให้ลองใช้ Pollinations.ai เป็นทางเลือกสุดท้าย (ถ้าเป็นไปได้)
+    st.error("❌ ไม่สามารถอัปโหลดรูปภาพไปยัง ImgBB ได้เลย เนื่องจาก API Key ทั้งหมดมีปัญหา (อาจจะโควตาเต็ม หรือไม่ถูกต้อง). \n\n**คำแนะนำ:** กรุณาส่ง ImgBB API Key ตัวใหม่มาให้ผม หรือลองใหม่อีกครั้งในภายหลังครับ")
     return None
 
 # --- Main UI ---
