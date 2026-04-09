@@ -76,6 +76,8 @@ if 'current_image_url' not in st.session_state:
     st.session_state['current_image_url'] = None
 if 'last_uploaded_file' not in st.session_state:
     st.session_state['last_uploaded_file'] = None
+if 'image_dims' not in st.session_state:
+    st.session_state['image_dims'] = (1024, 768)
 
 # --- Helper Function: Upload Image to ImgBB ---
 def upload_to_imgbb(image_path):
@@ -117,6 +119,10 @@ with col1:
         st.session_state['recommendations'] = None
         st.session_state['current_image_url'] = None
         st.session_state['last_uploaded_file'] = uploaded_file
+        
+        # เก็บขนาดรูปภาพต้นฉบับ
+        img = Image.open(uploaded_file)
+        st.session_state['image_dims'] = img.size # (width, height)
     
     if uploaded_file:
         img = Image.open(uploaded_file)
@@ -173,8 +179,9 @@ with col2:
                     f"{custom_prompt}. {detailed_narrative}"
                 )
                 
-                # สร้างรูปภาพ (ส่ง URL รูปต้นฉบับไปด้วยเพื่อทำ Image-to-Image)
-                result_image_url = generate_design(design_prompt, st.session_state['current_image_url'])
+                # สร้างรูปภาพ (ส่ง URL รูปต้นฉบับ และขนาดภาพไปด้วย)
+                width, height = st.session_state['image_dims']
+                result_image_url = generate_design(design_prompt, st.session_state['current_image_url'], width, height)
                 
                 # สร้างคำแนะนำ
                 recommendations = recommend_furniture_and_palette(design_prompt)
@@ -205,7 +212,7 @@ if st.session_state['result_image']:
     # ปุ่มดาวน์โหลด
     st.markdown(f'<a href="{st.session_state["result_image"]}" target="_blank"><button style="width:100%; border-radius:8px; height:3em; background-color:#28a745; color:white; font-weight:bold; border:none; cursor:pointer;">📥 ดาวน์โหลดรูปภาพความละเอียดสูง</button></a>', unsafe_allow_html=True)
 
-# Sidebar for Reset (ย้ายมาไว้ใน Sidebar แบบเงียบๆ เผื่อกรณีฉุกเฉิน)
+# Sidebar for Reset
 with st.sidebar:
     st.title("Settings")
     if st.button("ล้างข้อมูลทั้งหมด"):

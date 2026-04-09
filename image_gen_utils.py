@@ -5,18 +5,33 @@ import time
 import random
 import urllib.parse
 
-def generate_design(design_prompt: str, image_url: str = None) -> str:
+def generate_design(design_prompt: str, image_url: str = None, width: int = 1024, height: int = 768) -> str:
     """
     สร้างรูปภาพการออกแบบห้องใหม่โดยใช้ Replicate API (ControlNet Canny)
     เพื่อรักษาโครงสร้างห้องเดิม (Structural Preservation) 100%
+    และรักษาสัดส่วนภาพ (Aspect Ratio) ให้เท่ากับรูปต้นฉบับ
     """
     replicate_api_token = os.environ.get("REPLICATE_API_TOKEN")
     
+    # ปรับขนาดภาพให้เหมาะสมกับโมเดล (SDXL ทำงานได้ดีที่ประมาณ 1024px)
+    # แต่ยังคงสัดส่วนเดิมไว้
+    max_dim = 1024
+    if width > height:
+        new_width = max_dim
+        new_height = int((height / width) * max_dim)
+    else:
+        new_height = max_dim
+        new_width = int((width / height) * max_dim)
+    
+    # ปรับให้หารด้วย 8 ลงตัว (ข้อกำหนดของโมเดลส่วนใหญ่)
+    new_width = (new_width // 8) * 8
+    new_height = (new_height // 8) * 8
+
     # หากไม่มี Token หรือไม่มีรูปภาพต้นฉบับ ให้กลับไปใช้ Pollinations.ai เป็นทางเลือกสำรอง (Fallback)
     if not replicate_api_token or not image_url:
         encoded_prompt = urllib.parse.quote(design_prompt)
         seed = random.randint(1, 1000000)
-        return f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&seed={seed}&model=flux"
+        return f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={new_width}&height={new_height}&seed={seed}&model=flux"
 
     # ใช้โมเดล ControlNet Canny (SDXL) ที่รักษาเส้นโครงสร้างได้แม่นยำที่สุด
     model_id = "lucataco/controlnet-canny-sdxl:06d718b34f2142a3583d33967a99a209b9c2800291931057d25f9a21d78266ac"
@@ -30,11 +45,13 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
         "version": "06d718b34f2142a3583d33967a99a209b9c2800291931057d25f9a21d78266ac",
         "input": {
             "image": image_url,
-            "prompt": f"Professional interior design, {design_prompt}, high quality, realistic, 8k, architectural photography",
-            "negative_prompt": "low quality, blurry, distorted, messy, bad proportions, changed room structure, moved walls, changed window position, changed door position, changed floor layout",
-            "num_inference_steps": 30,
-            "controlnet_conditioning_scale": 0.95, # ปรับให้สูงขึ้นมาก (0.95) เพื่อบังคับให้ตามโครงสร้างเดิมเป๊ะๆ
-            "guidance_scale": 7.5
+            "prompt": f"Professional interior design, {design_prompt}, high quality, realistic, 8k, architectural photography, clean lines, sharp focus",
+            "negative_prompt": "low quality, blurry, distorted, messy, bad proportions, changed room structure, moved walls, changed window position, changed door position, changed floor layout, noise, grainy, artifacts",
+            "num_inference_steps": 35, # เพิ่มขั้นตอนเพื่อให้ภาพเนียนขึ้น
+            "controlnet_conditioning_scale": 0.85, # ปรับลดลงมาที่ 0.85 เพื่อลดปัญหาภาพแตก (Distortion) แต่ยังรักษาโครงสร้างได้ดี
+            "guidance_scale": 7.5,
+            "width": new_width,
+            "height": new_height
         }
     }
 
@@ -48,7 +65,7 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
         prediction = response.json()
         
         if "urls" not in prediction:
-            return generate_design(design_prompt, None)
+            return generate_design(design_prompt, None, width, height)
             
         get_url = prediction["urls"]["get"]
 
@@ -61,18 +78,18 @@ def generate_design(design_prompt: str, image_url: str = None) -> str:
             if status == "succeeded":
                 output = res_json.get("output")
                 if isinstance(output, list):
-                    return output[-1] # ปกติรูปสุดท้ายคือผลลัพธ์
+                    return output[-1]
                 return output
             elif status == "failed":
-                return generate_design(design_prompt, None)
+                return generate_design(design_prompt, None, width, height)
             
             time.sleep(3)
             
-        return generate_design(design_prompt, None)
+        return generate_design(design_prompt, None, width, height)
 
     except Exception as e:
         print(f"Replicate Error: {e}")
-        return generate_design(design_prompt, None)
+        return generate_design(design_prompt, None, width, height)
 
 def recommend_furniture_and_palette(design_prompt: str) -> str:
     """
