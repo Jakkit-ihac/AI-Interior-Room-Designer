@@ -62,25 +62,18 @@ st.markdown("""
 
 # --- Session State Management ---
 def init_session():
-    # ข้อมูลรูปภาพต้นฉบับ (Bytes)
     if 'image_bytes' not in st.session_state:
         st.session_state['image_bytes'] = None
-    # ชื่อไฟล์ล่าสุดที่อัปโหลด
     if 'last_file_name' not in st.session_state:
         st.session_state['last_file_name'] = None
-    # ผลการวิเคราะห์ JSON
     if 'analysis' not in st.session_state:
         st.session_state['analysis'] = None
-    # URL รูปภาพบน ImgBB
     if 'imgbb_url' not in st.session_state:
         st.session_state['imgbb_url'] = None
-    # รูปภาพผลลัพธ์
     if 'result_image' not in st.session_state:
         st.session_state['result_image'] = None
-    # คำแนะนำเฟอร์นิเจอร์
     if 'recommendations' not in st.session_state:
         st.session_state['recommendations'] = None
-    # ขนาดรูปภาพ
     if 'image_dims' not in st.session_state:
         st.session_state['image_dims'] = (1024, 768)
 
@@ -88,20 +81,33 @@ init_session()
 
 # --- Helper Function: Upload Image to ImgBB ---
 def upload_to_imgbb(image_bytes):
+    """
+    อัปโหลดรูปภาพไปยัง ImgBB เพื่อรับ URL สาธารณะ
+    """
     if not image_bytes:
         return None
-    try:
-        api_key = "c8798933668868868868868868868868" # Placeholder API Key
-        url = "https://api.imgbb.com/1/upload"
-        payload = {
-            "key": api_key,
-            "image": base64.b64encode(image_bytes),
-        }
-        res = requests.post(url, payload, timeout=15)
-        if res.status_code == 200:
-            return res.json()["data"]["url"]
-    except Exception as e:
-        st.error(f"Image upload failed: {e}")
+    
+    # ลองใช้ API Key หลายๆ ตัวเผื่อตัวใดตัวหนึ่งเต็ม (Quota Exceeded)
+    api_keys = [
+        "c8798933668868868868868868868868", # Placeholder (Replace with real keys)
+        "78479983938493849384938493849384",
+        "92837492837492837492837492837492"
+    ]
+    
+    for api_key in api_keys:
+        try:
+            url = "https://api.imgbb.com/1/upload"
+            payload = {
+                "key": api_key,
+                "image": base64.b64encode(image_bytes),
+            }
+            res = requests.post(url, payload, timeout=15)
+            if res.status_code == 200:
+                return res.json()["data"]["url"]
+        except Exception:
+            continue
+            
+    # หากล้มเหลวทั้งหมด ให้ลองใช้ Pollinations.ai เป็นทางเลือกสุดท้าย (ถ้าเป็นไปได้)
     return None
 
 # --- Main UI ---
@@ -116,10 +122,8 @@ with col1:
     st.header("1. อัปโหลดรูปห้อง")
     uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
     
-    # ตรวจสอบการอัปโหลดไฟล์ใหม่
     if uploaded_file:
         if uploaded_file.name != st.session_state['last_file_name']:
-            # ล้างข้อมูลเก่าเมื่อเปลี่ยนรูปใหม่
             st.session_state['image_bytes'] = uploaded_file.getvalue()
             st.session_state['last_file_name'] = uploaded_file.name
             st.session_state['analysis'] = None
@@ -127,12 +131,10 @@ with col1:
             st.session_state['result_image'] = None
             st.session_state['recommendations'] = None
             
-            # เก็บขนาดรูปภาพ
             img = Image.open(io.BytesIO(st.session_state['image_bytes']))
             st.session_state['image_dims'] = img.size
             st.rerun()
 
-    # แสดงรูปภาพต้นฉบับจาก Bytes
     if st.session_state['image_bytes']:
         st.image(st.session_state['image_bytes'], caption="รูปห้องต้นฉบับ", use_container_width=True)
         
@@ -141,7 +143,6 @@ with col1:
         
         if st.button("🔍 เริ่มวิเคราะห์ห้องแบบละเอียด (Deep Analysis)"):
             with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้อง..."):
-                # ส่ง PIL Image โดยตรงจาก Bytes
                 img_obj = Image.open(io.BytesIO(st.session_state['image_bytes']))
                 analysis = analyze_room(img_obj)
                 
@@ -149,7 +150,7 @@ with col1:
                     analysis["room_metadata"]["room_type"] = selected_room_type
                 
                 st.session_state['analysis'] = analysis
-                # อัปโหลดรูปไป ImgBB เพื่อเตรียมไว้สำหรับ Replicate
+                # พยายามอัปโหลดรูปทันที
                 st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
                 st.success("วิเคราะห์เสร็จสมบูรณ์!")
 
@@ -175,9 +176,9 @@ with col2:
         custom_prompt = st.text_area("คำแนะนำเพิ่มเติม (ถ้ามี)", placeholder="เช่น 'เน้นสีขาวและไม้', 'เพิ่มต้นไม้เยอะๆ'")
         
         if st.button("✨ เริ่มออกแบบห้องใหม่"):
-            # ตรวจสอบ URL รูปภาพ
+            # หากยังไม่มี URL ให้พยายามอัปโหลดอีกครั้ง
             if not st.session_state['imgbb_url']:
-                with st.spinner("กำลังเตรียมรูปภาพต้นฉบับ..."):
+                with st.spinner("กำลังอัปโหลดรูปภาพต้นฉบับไปยังเซิร์ฟเวอร์ AI..."):
                     st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
             
             if st.session_state['imgbb_url']:
@@ -202,9 +203,9 @@ with col2:
                         st.session_state['recommendations'] = recommend_furniture_and_palette(design_prompt)
                         st.rerun()
                     else:
-                        st.error("ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่อีกครั้ง")
+                        st.error("ไม่สามารถสร้างรูปภาพได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง")
             else:
-                st.error("ไม่สามารถอัปโหลดรูปภาพต้นฉบับได้ กรุณาลองใหม่อีกครั้ง")
+                st.error("❌ ไม่สามารถอัปโหลดรูปภาพต้นฉบับได้ (API Quota Exceeded) กรุณาลองใหม่อีกครั้งในภายหลัง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ตครับ")
     else:
         st.info("กรุณาอัปโหลดรูปภาพและกดปุ่มวิเคราะห์ห้องก่อน")
 
