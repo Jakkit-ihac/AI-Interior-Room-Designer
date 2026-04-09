@@ -66,18 +66,22 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- Session State Management ---
-if 'analysis' not in st.session_state:
-    st.session_state['analysis'] = None
-if 'result_image' not in st.session_state:
-    st.session_state['result_image'] = None
-if 'recommendations' not in st.session_state:
-    st.session_state['recommendations'] = None
-if 'current_image_url' not in st.session_state:
-    st.session_state['current_image_url'] = None
-if 'last_uploaded_file' not in st.session_state:
-    st.session_state['last_uploaded_file'] = None
-if 'image_dims' not in st.session_state:
-    st.session_state['image_dims'] = (1024, 768)
+# ใช้ฟังก์ชันเพื่อกำหนดค่าเริ่มต้นให้ Session State อย่างปลอดภัย
+def init_session():
+    if 'analysis' not in st.session_state:
+        st.session_state['analysis'] = None
+    if 'result_image' not in st.session_state:
+        st.session_state['result_image'] = None
+    if 'recommendations' not in st.session_state:
+        st.session_state['recommendations'] = None
+    if 'current_image_url' not in st.session_state:
+        st.session_state['current_image_url'] = None
+    if 'last_uploaded_file_name' not in st.session_state:
+        st.session_state['last_uploaded_file_name'] = None
+    if 'image_dims' not in st.session_state:
+        st.session_state['image_dims'] = (1024, 768)
+
+init_session()
 
 # --- Helper Function: Upload Image to ImgBB ---
 def upload_to_imgbb(image_path):
@@ -112,36 +116,39 @@ with col1:
     st.header("1. อัปโหลดรูปห้อง")
     uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
     
-    if uploaded_file and uploaded_file != st.session_state['last_uploaded_file']:
-        st.session_state['analysis'] = None
-        st.session_state['result_image'] = None
-        st.session_state['recommendations'] = None
-        st.session_state['current_image_url'] = None
-        st.session_state['last_uploaded_file'] = uploaded_file
-        
-        img = Image.open(uploaded_file)
-        st.session_state['image_dims'] = img.size
+    # หากมีการอัปโหลดไฟล์ใหม่ (เช็คจากชื่อไฟล์) ให้ล้างสถานะเดิม
+    if uploaded_file:
+        if uploaded_file.name != st.session_state['last_uploaded_file_name']:
+            st.session_state['analysis'] = None
+            st.session_state['result_image'] = None
+            st.session_state['recommendations'] = None
+            st.session_state['current_image_url'] = None
+            st.session_state['last_uploaded_file_name'] = uploaded_file.name
+            
+            img = Image.open(uploaded_file)
+            st.session_state['image_dims'] = img.size
+            
+            # บันทึกไฟล์ชั่วคราวเพื่อวิเคราะห์
+            temp_path = "temp_room.jpg"
+            img.save(temp_path)
+            st.session_state['temp_path'] = temp_path
     
     if uploaded_file:
-        img = Image.open(uploaded_file)
-        st.image(img, caption="รูปห้องต้นฉบับ", use_container_width=True)
+        st.image(uploaded_file, caption="รูปห้องต้นฉบับ", use_container_width=True)
         
-        temp_path = "temp_room.jpg"
-        img.save(temp_path)
-        
-        # เพิ่มตัวเลือกประเภทห้องเพื่อให้ผู้ใช้เลือกเองได้หาก AI วิเคราะห์ผิด
+        # เพิ่มตัวเลือกประเภทห้อง
         room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
         selected_room_type = st.selectbox("ระบุประเภทห้อง (เพื่อความแม่นยำ)", room_type_options)
         
         if st.button("🔍 เริ่มวิเคราะห์ห้องแบบละเอียด (Deep Analysis)"):
             with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้องแบบละเอียดสูงสุด..."):
-                analysis = analyze_room(temp_path)
-                # บังคับประเภทห้องตามที่ผู้ใช้เลือก
+                analysis = analyze_room(st.session_state['temp_path'])
                 if "room_metadata" in analysis:
                     analysis["room_metadata"]["room_type"] = selected_room_type
                 
                 st.session_state['analysis'] = analysis
-                st.session_state['current_image_url'] = upload_to_imgbb(temp_path)
+                # อัปโหลดรูปและเก็บ URL ไว้ถาวรใน Session
+                st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['temp_path'])
                 st.success("วิเคราะห์เสร็จสมบูรณ์!")
 
 with col2:
@@ -166,28 +173,36 @@ with col2:
         custom_prompt = st.text_area("คำแนะนำเพิ่มเติม (ถ้ามี)", placeholder="เช่น 'เน้นสีขาวและไม้', 'เพิ่มต้นไม้เยอะๆ'")
         
         if st.button("✨ เริ่มออกแบบห้องใหม่"):
-            with st.spinner("AI กำลังวาดรูปใหม่ (อาจใช้เวลา 30-60 วินาที)..."):
-                detailed_narrative = analysis.get("detailed_narrative", "")
-                furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
-                
-                design_prompt = build_design_prompt(
-                    metadata.get("room_type", "room"),
-                    interior_style,
-                    furniture_list,
-                    analysis.get("structural_elements", {}).get("walls", "white"),
-                    analysis.get("lighting_and_atmosphere", {}).get("natural_light", "unknown"),
-                    f"{custom_prompt}. {detailed_narrative}"
-                )
-                
-                width, height = st.session_state['image_dims']
-                result_image_url = generate_design(design_prompt, st.session_state['current_image_url'], width, height)
-                
-                if result_image_url:
-                    st.session_state['result_image'] = result_image_url
-                    st.session_state['recommendations'] = recommend_furniture_and_palette(design_prompt)
-                    st.rerun()
-                else:
-                    st.error("ไม่สามารถสร้างรูปภาพได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง")
+            # ตรวจสอบว่ามี URL รูปภาพต้นฉบับหรือไม่ (ถ้าไม่มีให้ลองอัปโหลดใหม่)
+            if not st.session_state['current_image_url']:
+                with st.spinner("กำลังเตรียมรูปภาพต้นฉบับ..."):
+                    st.session_state['current_image_url'] = upload_to_imgbb(st.session_state['temp_path'])
+            
+            if st.session_state['current_image_url']:
+                with st.spinner("AI กำลังวาดรูปใหม่ (อาจใช้เวลา 30-60 วินาที)..."):
+                    detailed_narrative = analysis.get("detailed_narrative", "")
+                    furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
+                    
+                    design_prompt = build_design_prompt(
+                        metadata.get("room_type", "room"),
+                        interior_style,
+                        furniture_list,
+                        analysis.get("structural_elements", {}).get("walls", "white"),
+                        analysis.get("lighting_and_atmosphere", {}).get("natural_light", "unknown"),
+                        f"{custom_prompt}. {detailed_narrative}"
+                    )
+                    
+                    width, height = st.session_state['image_dims']
+                    result_image_url = generate_design(design_prompt, st.session_state['current_image_url'], width, height)
+                    
+                    if result_image_url:
+                        st.session_state['result_image'] = result_image_url
+                        st.session_state['recommendations'] = recommend_furniture_and_palette(design_prompt)
+                        st.rerun()
+                    else:
+                        st.error("ไม่สามารถสร้างรูปภาพได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง")
+            else:
+                st.error("ไม่พบรูปภาพต้นฉบับ กรุณากดปุ่มวิเคราะห์ห้องใหม่อีกครั้ง")
     else:
         st.info("กรุณาอัปโหลดรูปภาพและกดปุ่มวิเคราะห์ห้องก่อน")
 
@@ -198,9 +213,10 @@ if st.session_state['result_image']:
     
     res_col1, res_col2 = st.columns(2)
     with res_col1:
-        st.image(uploaded_file, caption="ห้องเดิม", use_container_width=True)
+        if uploaded_file:
+            st.image(uploaded_file, caption="ห้องเดิม", use_container_width=True)
     with res_col2:
-        # ตรวจสอบว่า URL รูปภาพใช้งานได้จริง
+        # แสดงรูปภาพผลลัพธ์
         st.image(st.session_state['result_image'], caption=f"ห้องใหม่สไตล์ {interior_style}", use_container_width=True)
     
     if st.session_state['recommendations']:
@@ -215,6 +231,6 @@ if st.session_state['result_image']:
 with st.sidebar:
     st.title("Settings")
     if st.button("ล้างข้อมูลทั้งหมด"):
-        for key in st.session_state.keys():
-            st.session_state[key] = None
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
         st.rerun()
