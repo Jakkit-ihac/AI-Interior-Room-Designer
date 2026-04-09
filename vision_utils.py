@@ -5,11 +5,12 @@ import json
 import re
 import requests
 import urllib.parse
+import io
 
-def analyze_room(image_path: str) -> dict:
+def analyze_room(image_input) -> dict:
     """
     ใช้ Google Gemini 2.5 Flash เพื่อวิเคราะห์รูปภาพห้องแบบละเอียดสูงสุด (Deep Structural Analysis)
-    โดยส่งผลลัพธ์เป็น JSON ที่ครอบคลุมทั้งโครงสร้าง ขนาด มุม และตำแหน่งวัตถุ
+    รองรับทั้ง image_path (str) และ PIL Image object
     """
     api_key = os.environ.get("GOOGLE_API_KEY")
     
@@ -73,7 +74,12 @@ def analyze_room(image_path: str) -> dict:
         }
         """
 
-        img = Image.open(image_path)
+        # รองรับทั้ง path และ PIL Image
+        if isinstance(image_input, str):
+            img = Image.open(image_input)
+        else:
+            img = image_input
+            
         response = model.generate_content([prompt, img])
         
         # Extract JSON from the response text using Regex for better stability
