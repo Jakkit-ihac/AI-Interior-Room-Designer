@@ -641,8 +641,8 @@ if st.session_state['show_hero'] and not st.session_state['result_image']:
 
 # --- Input Section ---
 st.markdown('<div class="input-section">', unsafe_allow_html=True)
-    st.markdown('<h2 class="section-header">Transform Your Real Space</h2>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; color: #666; font-size: 1.05em; margin-bottom: 2em;">Your personal AI design assistant analyzes your actual room structure and creates a custom design that preserves your space while transforming its style.</p>', unsafe_allow_html=True)
+st.markdown('<h2 class="section-header">Transform Your Real Space</h2>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; color: #666; font-size: 1.05em; margin-bottom: 2em;">Your personal AI design assistant analyzes your actual room structure and creates a custom design that preserves your space while transforming its style.</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
