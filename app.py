@@ -68,6 +68,45 @@ st.markdown("""
         letter-spacing: 0.05em;
     }
     
+    /* AI Analysis Section */
+    .analysis-section {
+        background: linear-gradient(135deg, #f9f7f4 0%, #ffffff 100%);
+        padding: 3em 2em;
+        margin: 2em 0;
+        border-radius: 20px;
+        border-left: 5px solid #d4af6e;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+    
+    .analysis-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5em;
+        font-weight: 800;
+        color: #1a1a1a !important;
+        margin-bottom: 1.5em;
+        display: flex;
+        align-items: center;
+        gap: 0.8em;
+    }
+    
+    .analysis-content {
+        font-size: 0.95em;
+        line-height: 1.8;
+        color: #333333 !important;
+    }
+    
+    .analysis-content p {
+        margin-bottom: 1em;
+    }
+    
+    .analysis-highlight {
+        background: linear-gradient(135deg, rgba(212, 175, 110, 0.1) 0%, rgba(232, 197, 71, 0.1) 100%);
+        padding: 1.5em;
+        border-radius: 12px;
+        margin: 1.5em 0;
+        border-left: 3px solid #d4af6e;
+    }
+    
     .hero-cta {
         display: inline-block;
         padding: 1em 2.5em;
@@ -602,13 +641,15 @@ if st.session_state['show_hero'] and not st.session_state['result_image']:
 
 # --- Input Section ---
 st.markdown('<div class="input-section">', unsafe_allow_html=True)
-st.markdown('<h2 class="section-header">Design Your Space</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-header">Transform Your Real Space</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #666; font-size: 1.05em; margin-bottom: 2em;">Your personal AI design assistant analyzes your actual room structure and creates a custom design that preserves your space while transforming its style.</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown('<div class="input-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">📸 Upload Your Room</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="card-title">📸 Upload Your Real Space</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="color: #666; font-size: 0.9em; margin-bottom: 1em;">Upload a clear photo of your room. Our AI will analyze the structure, lighting, and existing elements.</p>', unsafe_allow_html=True)
     uploaded_file = st.file_uploader("Choose a room image", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     
     if uploaded_file:
@@ -619,7 +660,8 @@ with col1:
 
 with col2:
     st.markdown('<div class="input-card">', unsafe_allow_html=True)
-    st.markdown('<h3 class="card-title">✨ Choose Style & Room</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="card-title">✨ Select Your Design Vision</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="color: #666; font-size: 0.9em; margin-bottom: 1em;">Choose a style that matches your vision. Our AI will adapt it to your actual room.</p>', unsafe_allow_html=True)
     
     col_style, col_room = st.columns(2)
     with col_style:
@@ -649,15 +691,38 @@ if st.session_state['image_bytes']:
         if st.button("🚀 Analyze & Design", use_container_width=True):
             st.session_state['show_hero'] = False
             
-            with st.spinner("🔍 Analyzing your room..."):
+            with st.spinner("🔍 Analyzing your real space..."):
                 try:
                     analysis = analyze_room(st.session_state['image_bytes'])
                     st.session_state['analysis'] = analysis
+                    
+                    # Display AI Analysis Insights
+                    st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
+                    st.markdown('<h3 class="analysis-title">🔍 AI Analysis of Your Space</h3>', unsafe_allow_html=True)
+                    
+                    analysis_text = analysis.get('room_description', 'Analyzing your room...')
+                    st.markdown(f'<div class="analysis-content">{analysis_text}</div>', unsafe_allow_html=True)
+                    
+                    if 'room_metadata' in analysis:
+                        metadata = analysis['room_metadata']
+                        st.markdown('<div class="analysis-highlight">', unsafe_allow_html=True)
+                        st.markdown('<strong>Key Room Characteristics:</strong>', unsafe_allow_html=True)
+                        if 'lighting' in metadata:
+                            st.markdown(f"<p>💡 <strong>Lighting:</strong> {metadata['lighting']}</p>", unsafe_allow_html=True)
+                        if 'wall_color' in metadata:
+                            st.markdown(f"<p>🎨 <strong>Wall Color:</strong> {metadata['wall_color']}</p>", unsafe_allow_html=True)
+                        if 'room_size' in metadata:
+                            st.markdown(f"<p>📐 <strong>Room Size:</strong> {metadata['room_size']}</p>", unsafe_allow_html=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown('---')
+                    
                 except Exception as e:
                     st.error(f"Error analyzing room: {str(e)}")
                     st.stop()
             
-            with st.spinner("🎨 Generating your design..."):
+            with st.spinner("🎨 Generating your personalized design..."):
                 try:
                     # Extract necessary data from analysis
                     room_type = st.session_state['selected_room_type']
@@ -666,6 +731,12 @@ if st.session_state['image_bytes']:
                     wall_info = analysis.get('room_metadata', {}).get('wall_color', 'neutral walls')
                     lighting_info = analysis.get('room_metadata', {}).get('lighting', 'natural light')
                     detailed_narrative = analysis.get('room_description', 'modern room')
+                    
+                    # Show detailed prompt generation status
+                    st.info(f"🤖 **AI Design Assistant is working...**\n\n" +
+                           f"Analyzing your {room_type} with {lighting_info}...\n" +
+                           f"Generating {interior_style} design while preserving your room's structure...\n" +
+                           f"Creating hyper-realistic visualization...")
                     
                     prompt = build_design_prompt(
                         room_type,
@@ -722,7 +793,8 @@ if st.session_state['result_image']:
     # Right Side
     st.markdown('<div class="results-right">', unsafe_allow_html=True)
     
-    st.markdown('<h2 class="result-title">Design Solution</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="result-title">Your Personalized Design</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="color: #666; font-size: 1em; margin-bottom: 1.5em;">Based on your real space analysis, here is your AI-generated design proposal that preserves your room\'s structure while transforming its style.</p>', unsafe_allow_html=True)
     
     if st.session_state['recommendations']:
         st.markdown(f'<div class="result-description">{st.session_state["recommendations"]}</div>', unsafe_allow_html=True)
