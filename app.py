@@ -17,45 +17,224 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Simple & Clean CSS ---
+# --- Professional Slide-like CSS Styling ---
 st.markdown("""
     <style>
-    .main {
-        background-color: #f8f9fa;
+    * {
+        font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
     }
+    
+    .main {
+        background: linear-gradient(135deg, #f5f1ed 0%, #ede9e4 100%);
+    }
+    
+    /* Header & Title Styling */
+    .slide-header {
+        font-size: 2.5em;
+        font-weight: 700;
+        color: #2c2c2c;
+        margin-bottom: 0.5em;
+        letter-spacing: -0.02em;
+    }
+    
+    .slide-subtitle {
+        font-size: 1.1em;
+        color: #666;
+        font-weight: 300;
+        margin-bottom: 2em;
+    }
+    
+    /* Slide Container */
+    .slide-container {
+        background: white;
+        border-radius: 12px;
+        padding: 3em;
+        margin: 2em 0;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .slide-container-dark {
+        background: linear-gradient(135deg, #e8e4df 0%, #ddd9d4 100%);
+        border-radius: 12px;
+        padding: 3em;
+        margin: 2em 0;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    /* Two-Column Layout */
+    .slide-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3em;
+        align-items: center;
+    }
+    
+    .slide-image-container {
+        display: flex;
+        gap: 1.5em;
+        flex-wrap: wrap;
+    }
+    
+    .slide-image-wrapper {
+        flex: 1;
+        min-width: 200px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transition: transform 0.3s ease;
+    }
+    
+    .slide-image-wrapper:hover {
+        transform: translateY(-4px);
+    }
+    
+    .slide-image-wrapper img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    /* Text Content */
+    .slide-content {
+        padding: 1.5em 0;
+    }
+    
+    .slide-content h3 {
+        font-size: 1.8em;
+        color: #2c2c2c;
+        margin-bottom: 1em;
+        font-weight: 600;
+    }
+    
+    .slide-content p {
+        font-size: 1em;
+        line-height: 1.8;
+        color: #555;
+        margin-bottom: 1em;
+    }
+    
+    .slide-content ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .slide-content li {
+        font-size: 0.95em;
+        line-height: 1.8;
+        color: #555;
+        margin-bottom: 0.8em;
+        padding-left: 1.5em;
+        position: relative;
+    }
+    
+    .slide-content li:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #b8860b;
+        font-weight: bold;
+    }
+    
+    /* Button Styling */
     .stButton>button {
         width: 100%;
         border-radius: 8px;
         height: 3em;
-        background-color: #007bff;
+        background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
         color: white;
-        font-weight: bold;
+        font-weight: 600;
         border: none;
+        font-size: 1em;
+        transition: all 0.3s ease;
     }
+    
     .stButton>button:hover {
-        background-color: #0056b3;
+        background: linear-gradient(135deg, #6b5344 0%, #4b3334 100%);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    .result-container {
-        background-color: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin-top: 20px;
-    }
+    
+    /* Analysis Box */
     .analysis-box {
-        background-color: #e9ecef;
-        padding: 15px;
+        background: linear-gradient(135deg, #f0ebe6 0%, #e8e3de 100%);
+        padding: 1.5em;
         border-radius: 8px;
-        border-left: 5px solid #007bff;
-        margin-bottom: 15px;
+        border-left: 5px solid #8b7355;
+        margin-bottom: 1.5em;
+        font-size: 0.95em;
     }
-    pre {
-        background-color: #2d2d2d;
-        color: #f8f8f2;
-        padding: 15px;
+    
+    .analysis-box b {
+        color: #2c2c2c;
+    }
+    
+    /* Result Container */
+    .result-container {
+        background: white;
+        padding: 2.5em;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        margin-top: 2em;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .result-title {
+        font-size: 2em;
+        color: #2c2c2c;
+        margin-bottom: 1.5em;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    
+    /* Recommendation Box */
+    .recommendation-box {
+        background: linear-gradient(135deg, #f9f7f4 0%, #f5f1ed 100%);
+        padding: 2em;
         border-radius: 8px;
-        font-size: 0.9em;
-        overflow-x: auto;
+        border-left: 4px solid #b8860b;
+        margin-top: 1.5em;
+    }
+    
+    .recommendation-box h4 {
+        color: #2c2c2c;
+        margin-bottom: 1em;
+        font-size: 1.2em;
+    }
+    
+    .recommendation-box p {
+        color: #555;
+        line-height: 1.8;
+        font-size: 0.95em;
+    }
+    
+    /* Sidebar */
+    .sidebar-content {
+        background: white;
+        padding: 1.5em;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    /* Expander */
+    .streamlit-expanderHeader {
+        background-color: #f0ebe6 !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .slide-two-col {
+            grid-template-columns: 1fr;
+        }
+        
+        .slide-container {
+            padding: 1.5em;
+        }
+        
+        .slide-header {
+            font-size: 1.8em;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -89,15 +268,12 @@ def upload_to_imgbb(image_bytes):
     if not image_bytes:
         return None
     
-    # ลองใช้ API Key หลายๆ ตัวเผื่อตัวใดตัวหนึ่งเต็ม (Quota Exceeded)
-    # หมายเหตุ: หากคุณมี API Key ของตัวเอง สามารถนำมาใส่ที่นี่ได้เลยครับ
     api_keys = [
-        "533f07276d994ec8350b6177fb133a0d", # Key หลักจากผู้ใช้
-        "6d207e021112d492d03f842280a32101", # Key สำรอง 1 (ตัวอย่าง)
-        "c8798933668868868868868868868868", # Key สำรอง 2 (ตัวอย่าง)
-        "e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6", # Key สำรอง 3 (ตัวอย่าง)
-        "u7v8w9x0y1z2a3b4c5d6e7f8g9h0i1j2"  # Key สำรอง 4 (ตัวอย่าง)
-    
+        "533f07276d994ec8350b6177fb133a0d",
+        "6d207e021112d492d03f842280a32101",
+        "c8798933668868868868868868868868",
+        "e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6",
+        "u7v8w9x0y1z2a3b4c5d6e7f8g9h0i1j2"
     ]
     
     for api_key in api_keys:
@@ -111,34 +287,24 @@ def upload_to_imgbb(image_bytes):
             if res.status_code == 200:
                 return res.json()["data"]["url"]
             elif res.status_code == 400 and "quota exceeded" in res.text.lower():
-                st.warning(f"ImgBB API Key (ending in {api_key[-4:]}) โควตาเต็ม. กำลังลองใช้ Key ถัดไป...")
-                continue # ลองใช้ key ถัดไป
+                continue
             else:
-                st.error(f"ImgBB API Key (ending in {api_key[-4:]}) เกิดข้อผิดพลาด: {res.status_code} - {res.text}")
-                continue # ลองใช้ key ถัดไป
-        except requests.exceptions.Timeout:
-            st.warning(f"ImgBB API Key (ending in {api_key[-4:]}) หมดเวลาการเชื่อมต่อ. กำลังลองใช้ Key ถัดไป...")
-            continue
-        except requests.exceptions.RequestException as e:
-            st.error(f"ImgBB API Key (ending in {api_key[-4:]}) เกิดข้อผิดพลาดในการเชื่อมต่อ: {e}. กำลังลองใช้ Key ถัดไป...")
-            continue
-        except Exception as e:
-            st.error(f"ImgBB API Key (ending in {api_key[-4:]}) เกิดข้อผิดพลาดที่ไม่คาดคิด: {e}. กำลังลองใช้ Key ถัดไป...")
+                continue
+        except:
             continue
             
-    st.error("❌ ไม่สามารถอัปโหลดรูปภาพไปยัง ImgBB ได้เลย เนื่องจาก API Key ทั้งหมดมีปัญหา (อาจจะโควตาเต็ม หรือไม่ถูกต้อง). \n\n**คำแนะนำ:** กรุณาส่ง ImgBB API Key ตัวใหม่มาให้ผม หรือลองใหม่อีกครั้งในภายหลังครับ")
+    st.error("❌ ไม่สามารถอัปโหลดรูปภาพได้ กรุณาลองใหม่อีกครั้ง")
     return None
 
 # --- Main UI ---
-st.title("🏠 AI Interior Room Designer")
-st.write("วิเคราะห์ห้องแบบละเอียดและออกแบบใหม่โดยรักษาโครงสร้างเดิม 100%")
+st.markdown('<div style="text-align: center; margin-bottom: 2em;"><h1 class="slide-header">🏠 AI Interior Room Designer</h1><p class="slide-subtitle">ออกแบบห้องใหม่ด้วย AI ในเพียงไม่กี่คลิก</p></div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    st.header("1. อัปโหลดรูปห้อง")
+    st.markdown('<h3 style="color: #2c2c2c; font-weight: 600; margin-bottom: 1.5em;">📸 ขั้นตอนที่ 1: อัปโหลดรูปห้อง</h3>', unsafe_allow_html=True)
     uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
     
     if uploaded_file:
@@ -155,12 +321,14 @@ with col1:
             st.rerun()
 
     if st.session_state['image_bytes']:
+        st.markdown('<div style="border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.12);">', unsafe_allow_html=True)
         st.image(st.session_state['image_bytes'], caption="รูปห้องต้นฉบับ", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
         room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
-        selected_room_type = st.selectbox("ระบุประเภทห้อง (เพื่อความแม่นยำ)", room_type_options)
+        selected_room_type = st.selectbox("ระบุประเภทห้อง", room_type_options)
         
-        if st.button("🔍 เริ่มวิเคราะห์ห้องแบบละเอียด (Deep Analysis)"):
+        if st.button("🔍 วิเคราะห์ห้อง"):
             with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้อง..."):
                 img_obj = Image.open(io.BytesIO(st.session_state['image_bytes']))
                 analysis = analyze_room(img_obj)
@@ -169,39 +337,36 @@ with col1:
                     analysis["room_metadata"]["room_type"] = selected_room_type
                 
                 st.session_state['analysis'] = analysis
-                # พยายามอัปโหลดรูปทันที
                 st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
-                st.success("วิเคราะห์เสร็จสมบูรณ์!")
+                st.success("✅ วิเคราะห์เสร็จสมบูรณ์!")
 
 with col2:
-    st.header("2. ผลการวิเคราะห์และเลือกสไตล์")
+    st.markdown('<h3 style="color: #2c2c2c; font-weight: 600; margin-bottom: 1.5em;">✨ ขั้นตอนที่ 2: เลือกสไตล์และออกแบบ</h3>', unsafe_allow_html=True)
     
     if st.session_state['analysis']:
         analysis = st.session_state['analysis']
         
-        st.subheader("📝 รายละเอียดห้องที่ตรวจพบ")
-        metadata = analysis.get("room_metadata", {})
-        st.markdown(f'<div class="analysis-box"><b>ประเภทห้อง:</b> {metadata.get("room_type", "unknown")} | <b>มุมมอง:</b> {metadata.get("camera_perspective", "unknown")}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="analysis-box"><b>✓ ห้องที่ตรวจพบ:</b> ' + analysis.get("room_metadata", {}).get("room_type", "unknown") + '</div>', unsafe_allow_html=True)
         
-        with st.expander("🔍 ดูโครงสร้าง JSON แบบละเอียด", expanded=False):
+        with st.expander("📋 ดูรายละเอียด JSON", expanded=False):
             st.json(analysis)
         
         st.markdown("---")
         interior_style = st.selectbox(
-            "เลือกสไตล์การออกแบบใหม่",
+            "เลือกสไตล์การออกแบบ",
             ["Minimalist", "Modern Luxury", "Industrial", "Scandinavian", "Japanese Zen", "Bohemian"]
         )
         
-        custom_prompt = st.text_area("คำแนะนำเพิ่มเติม (ถ้ามี)", placeholder="เช่น 'เน้นสีขาวและไม้', 'เพิ่มต้นไม้เยอะๆ'")
+        custom_prompt = st.text_area("คำแนะนำเพิ่มเติม (ถ้ามี)", placeholder="เช่น 'เน้นสีขาวและไม้', 'เพิ่มต้นไม้เยอะๆ'", height=80)
         
         if st.button("✨ เริ่มออกแบบห้องใหม่"):
-            # หากยังไม่มี URL ให้พยายามอัปโหลดอีกครั้ง
             if not st.session_state['imgbb_url']:
-                with st.spinner("กำลังอัปโหลดรูปภาพต้นฉบับไปยังเซิร์ฟเวอร์ AI..."):
+                with st.spinner("กำลังอัปโหลดรูปภาพ..."):
                     st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
             
             if st.session_state['imgbb_url']:
-                with st.spinner(f"AI กำลังวาดรูปใหม่สไตล์ {interior_style}..."):
+                with st.spinner(f"AI กำลังสร้างห้องสไตล์ {interior_style}..."):
+                    metadata = analysis.get("room_metadata", {})
                     detailed_narrative = analysis.get("detailed_narrative", "")
                     furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
                     
@@ -225,9 +390,9 @@ with col2:
                     else:
                         st.error("ไม่สามารถสร้างรูปภาพได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง")
             else:
-                st.error("❌ ไม่สามารถอัปโหลดรูปภาพต้นฉบับได้ (API Quota Exceeded) กรุณาลองใหม่อีกครั้งในภายหลัง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ตครับ")
+                st.error("❌ ไม่สามารถอัปโหลดรูปภาพได้")
     else:
-        st.info("กรุณาอัปโหลดรูปภาพและกดปุ่มวิเคราะห์ห้องก่อน")
+        st.info("📌 กรุณาอัปโหลดรูปภาพและกดปุ่มวิเคราะห์ห้องก่อน")
 
 # --- Auto-scroll to Results ---
 if st.session_state.get('scroll_to_results'):
@@ -240,29 +405,66 @@ if st.session_state.get('scroll_to_results'):
     </script>
     """, unsafe_allow_html=True)
 
-# --- Results Display ---
+# --- Results Display (Slide Style) ---
 if st.session_state['result_image']:
     st.markdown("---")
-    st.header("🎨 ผลลัพธ์การออกแบบ")
     
-    res_col1, res_col2 = st.columns(2)
-    with res_col1:
-        st.image(st.session_state['image_bytes'], caption="ห้องเดิม", use_container_width=True)
-    with res_col2:
-        st.image(st.session_state['result_image'], caption=f"ห้องใหม่สไตล์ {interior_style}", use_container_width=True)
+    # Slide 1: Design Proposal
+    st.markdown('<div class="slide-container">', unsafe_allow_html=True)
+    st.markdown('<h2 class="result-title">🎨 DESIGN PROPOSAL</h2>', unsafe_allow_html=True)
     
+    st.markdown('<div class="slide-two-col">', unsafe_allow_html=True)
+    
+    col_before, col_after = st.columns(2)
+    with col_before:
+        st.markdown('<div style="text-align: center;"><h4 style="color: #2c2c2c; margin-bottom: 1em;">BEFORE</h4></div>', unsafe_allow_html=True)
+        st.markdown('<div class="slide-image-wrapper">', unsafe_allow_html=True)
+        st.image(st.session_state['image_bytes'], use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col_after:
+        st.markdown('<div style="text-align: center;"><h4 style="color: #2c2c2c; margin-bottom: 1em;">AFTER</h4></div>', unsafe_allow_html=True)
+        st.markdown('<div class="slide-image-wrapper">', unsafe_allow_html=True)
+        st.image(st.session_state['result_image'], use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Slide 2: Recommendations
     if st.session_state['recommendations']:
-        st.markdown('<div class="result-container">', unsafe_allow_html=True)
-        st.subheader("💡 คำแนะนำจาก AI Designer")
-        st.write(st.session_state['recommendations'])
+        st.markdown('<div class="slide-container-dark">', unsafe_allow_html=True)
+        st.markdown('<h2 class="result-title">💡 AI DESIGNER RECOMMENDATIONS</h2>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="recommendation-box">', unsafe_allow_html=True)
+        st.markdown(st.session_state['recommendations'])
         st.markdown('</div>', unsafe_allow_html=True)
         
-    st.markdown(f'<a href="{st.session_state["result_image"]}" target="_blank"><button style="width:100%; border-radius:8px; height:3em; background-color:#28a745; color:white; font-weight:bold; border:none; cursor:pointer;">📥 ดาวน์โหลดรูปภาพความละเอียดสูง</button></a>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Download Button
+    st.markdown('<div style="text-align: center; margin-top: 2em;">', unsafe_allow_html=True)
+    st.markdown(f'<a href="{st.session_state["result_image"]}" target="_blank"><button style="padding: 1em 2em; border-radius: 8px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); color: white; font-weight: 600; border: none; cursor: pointer; font-size: 1em;">📥 ดาวน์โหลดรูปภาพ</button></a>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# Sidebar for Reset
+# Sidebar
 with st.sidebar:
-    st.title("Settings")
-    if st.button("ล้างข้อมูลทั้งหมด"):
+    st.markdown('<div class="sidebar-content">', unsafe_allow_html=True)
+    st.title("⚙️ Settings")
+    
+    if st.button("🔄 ล้างข้อมูลทั้งหมด"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
+    
+    st.markdown("---")
+    st.markdown("**ℹ️ เกี่ยวกับแอป**")
+    st.markdown("""
+    AI Interior Room Designer ช่วยให้คุณสามารถ:
+    - 📸 อัปโหลดรูปห้องของคุณ
+    - 🤖 ให้ AI วิเคราะห์โครงสร้างห้อง
+    - 🎨 เลือกสไตล์ที่ชอบ
+    - ✨ ได้รูปห้องใหม่ที่สวยงาม
+    """)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
