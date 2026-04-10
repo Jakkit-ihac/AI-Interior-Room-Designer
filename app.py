@@ -12,66 +12,166 @@ from image_gen_utils import generate_design, recommend_furniture_and_palette
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="AI Interior Designer",
+    page_title="AI Interior Designer | Professional Design Studio",
     page_icon="🏠",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# --- Professional Editorial CSS Styling (Inspired by SOLUTION CONCEPT slide) ---
+# --- Premium Editorial CSS Styling ---
 st.markdown("""
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
     * {
-        font-family: 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    html, body, [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #faf8f6 0%, #f5f1ed 100%);
+        font-family: 'Inter', sans-serif;
     }
     
     .main {
-        background: #f5f1ed;
+        background: transparent !important;
         padding: 0 !important;
+    }
+    
+    /* Header Section */
+    .header-section {
+        background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+        color: white;
+        padding: 4em 3em;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .header-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(139, 115, 85, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .header-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 3.5em;
+        font-weight: 800;
+        margin-bottom: 0.5em;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+    
+    .header-subtitle {
+        font-size: 1.1em;
+        font-weight: 300;
+        color: rgba(255, 255, 255, 0.8);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
     }
     
     /* Input Section */
     .input-section {
-        background: #f5f1ed;
         padding: 3em 2em;
+        max-width: 1600px;
+        margin: 0 auto;
     }
     
-    .section-title {
-        font-size: 1.3em;
-        font-weight: 600;
+    .section-header {
+        font-family: 'Playfair Display', serif;
+        font-size: 2em;
+        font-weight: 700;
+        color: #2c2c2c;
+        margin-bottom: 2em;
+        letter-spacing: -0.01em;
+    }
+    
+    .input-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3em;
+        margin-bottom: 3em;
+    }
+    
+    .input-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5em;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .input-card:hover {
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    
+    .card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5em;
+        font-weight: 700;
         color: #2c2c2c;
         margin-bottom: 1.5em;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
     }
     
-    /* Input Container */
-    .input-container {
-        background: white;
-        padding: 2em;
+    .stFileUploader {
+        background: linear-gradient(135deg, #f9f7f4 0%, #f5f1ed 100%);
         border-radius: 8px;
+        padding: 1.5em;
         margin-bottom: 1.5em;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 2px dashed #d4ccc4;
+        transition: all 0.3s ease;
+    }
+    
+    .stFileUploader:hover {
+        border-color: #8b7355;
+        background: linear-gradient(135deg, #faf8f6 0%, #f7f3ee 100%);
     }
     
     .stButton>button {
         width: 100%;
-        border-radius: 6px;
-        height: 2.8em;
+        height: 3em;
+        border-radius: 8px;
         background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
         color: white;
         font-weight: 600;
         border: none;
-        font-size: 0.95em;
+        font-size: 1em;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        cursor: pointer;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2);
     }
     
     .stButton>button:hover {
         background: linear-gradient(135deg, #6b5344 0%, #4b3334 100%);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 24px rgba(139, 115, 85, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    .stSelectbox, .stTextArea {
+        font-size: 0.95em;
     }
     
     /* Results Container */
-    .results-wrapper {
+    .results-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
         min-height: 100vh;
@@ -81,50 +181,64 @@ st.markdown("""
     
     .results-left {
         background: linear-gradient(135deg, #e8e4df 0%, #ddd9d4 100%);
-        padding: 4em 3em;
+        padding: 5em 3em;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         position: relative;
+        overflow: hidden;
     }
     
     .results-left::before {
         content: 'ครูบาช่วยหมูเด้งด้วย';
         position: absolute;
-        top: 2em;
+        top: 2.5em;
         left: 3em;
-        font-size: 0.85em;
+        font-size: 0.8em;
         color: #2c2c2c;
         font-weight: 500;
+        letter-spacing: 0.05em;
     }
     
-    .results-right {
-        background: white;
-        padding: 4em 3em;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+    .results-left::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        pointer-events: none;
     }
     
-    .images-container {
+    .images-gallery {
         display: flex;
-        gap: 2em;
+        gap: 2.5em;
         justify-content: center;
         flex-wrap: wrap;
+        position: relative;
+        z-index: 2;
     }
     
-    .image-item {
-        flex: 0 1 280px;
+    .image-showcase {
+        flex: 0 1 320px;
         text-align: center;
     }
     
     .image-frame {
-        border-radius: 8px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
         background: white;
-        margin-bottom: 0.8em;
+        margin-bottom: 1.2em;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+    }
+    
+    .image-frame:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
     }
     
     .image-frame img {
@@ -134,114 +248,157 @@ st.markdown("""
     }
     
     .image-label {
-        font-size: 0.85em;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8em;
         color: #666;
-        font-weight: 500;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.1em;
+    }
+    
+    .results-right {
+        background: white;
+        padding: 5em 3em;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+    }
+    
+    .results-right::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #e0dcd7, transparent);
     }
     
     .result-title {
-        font-size: 2.2em;
-        font-weight: 700;
+        font-family: 'Playfair Display', serif;
+        font-size: 2.8em;
+        font-weight: 800;
         color: #2c2c2c;
         margin-bottom: 1.5em;
         letter-spacing: -0.02em;
+        line-height: 1.2;
     }
     
     .result-description {
         font-size: 0.95em;
-        line-height: 1.8;
+        line-height: 1.9;
         color: #555;
-        margin-bottom: 1.5em;
+        margin-bottom: 2em;
     }
     
-    .shopping-list {
-        margin-top: 2em;
-        padding-top: 1.5em;
+    .result-description p {
+        margin-bottom: 1.2em;
+    }
+    
+    .result-description strong {
+        color: #2c2c2c;
+        font-weight: 600;
+    }
+    
+    /* Specification Section */
+    .specification-section {
+        margin-top: 2.5em;
+        padding-top: 2.5em;
         border-top: 2px solid #e0dcd7;
     }
     
-    .shopping-list h4 {
-        font-size: 1em;
+    .spec-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.3em;
+        font-weight: 700;
         color: #2c2c2c;
-        margin-bottom: 1em;
-        font-weight: 600;
+        margin-bottom: 1.5em;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
     
-    .shopping-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8em 0;
+    .spec-item {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1em;
+        padding: 1em 0;
         border-bottom: 1px solid #f0ebe6;
-        font-size: 0.9em;
+        align-items: center;
     }
     
-    .shopping-item:last-child {
+    .spec-item:last-child {
         border-bottom: none;
     }
     
-    .item-name {
+    .spec-label {
+        font-weight: 600;
         color: #2c2c2c;
-        font-weight: 500;
+        font-size: 0.9em;
     }
     
-    .item-price {
+    .spec-value {
         color: #666;
-        font-size: 0.85em;
+        font-size: 0.9em;
     }
     
-    .item-buy-btn {
-        background: #4a90e2;
+    .download-button {
+        margin-top: 2.5em;
+        padding: 1.2em 2em;
+        background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
         color: white;
         border: none;
-        padding: 0.4em 0.8em;
-        border-radius: 4px;
-        font-size: 0.8em;
-        cursor: pointer;
+        border-radius: 8px;
         font-weight: 600;
-        transition: background 0.2s ease;
+        font-size: 0.95em;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2);
     }
     
-    .item-buy-btn:hover {
-        background: #357abd;
+    .download-button:hover {
+        background: linear-gradient(135deg, #6b5344 0%, #4b3334 100%);
+        box-shadow: 0 8px 24px rgba(139, 115, 85, 0.3);
+        transform: translateY(-2px);
     }
     
     /* Responsive */
-    @media (max-width: 1024px) {
-        .results-wrapper {
+    @media (max-width: 1200px) {
+        .input-grid {
             grid-template-columns: 1fr;
         }
         
-        .results-left {
+        .results-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .results-left, .results-right {
             padding: 3em 2em;
             min-height: auto;
         }
         
-        .results-right {
-            padding: 3em 2em;
+        .header-title {
+            font-size: 2.5em;
         }
         
-        .results-left::before {
-            top: 1.5em;
-            left: 2em;
+        .result-title {
+            font-size: 2em;
         }
     }
     
     @media (max-width: 768px) {
-        .result-title {
-            font-size: 1.6em;
+        .images-gallery {
+            flex-direction: column;
         }
         
-        .image-item {
+        .image-showcase {
             flex: 0 1 100%;
         }
         
-        .images-container {
-            flex-direction: column;
+        .spec-item {
+            grid-template-columns: 1fr;
         }
     }
     </style>
@@ -263,8 +420,6 @@ def init_session():
         st.session_state['recommendations'] = None
     if 'image_dims' not in st.session_state:
         st.session_state['image_dims'] = (1024, 768)
-    if 'scroll_to_results' not in st.session_state:
-        st.session_state['scroll_to_results'] = False
     if 'selected_style' not in st.session_state:
         st.session_state['selected_style'] = None
 
@@ -303,146 +458,141 @@ def upload_to_imgbb(image_bytes):
     st.error("❌ ไม่สามารถอัปโหลดรูปภาพได้ กรุณาลองใหม่อีกครั้ง")
     return None
 
-# --- Main UI ---
+# --- Header ---
+st.markdown("""
+    <div class="header-section">
+        <div class="header-content">
+            <h1 class="header-title">AI Interior Design Studio</h1>
+            <p class="header-subtitle">Transform Your Space with Artificial Intelligence</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- Main Content ---
 st.markdown('<div class="input-section">', unsafe_allow_html=True)
 
-col1, col2 = st.columns([1, 1], gap="large")
+st.markdown('<h2 class="section-header">Design Your Space</h2>', unsafe_allow_html=True)
 
-with col1:
-    st.markdown('<h3 class="section-title">📸 ขั้นตอนที่ 1: อัปโหลดรูปห้อง</h3>', unsafe_allow_html=True)
+st.markdown('<div class="input-grid">', unsafe_allow_html=True)
+
+# Left Column
+st.markdown('<div class="input-card">', unsafe_allow_html=True)
+st.markdown('<div class="card-title">📸 Step 1: Upload Your Room</div>', unsafe_allow_html=True)
+
+uploaded_file = st.file_uploader("Choose an image of your room (JPG, PNG)", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+
+if uploaded_file:
+    if uploaded_file.name != st.session_state['last_file_name']:
+        st.session_state['image_bytes'] = uploaded_file.getvalue()
+        st.session_state['last_file_name'] = uploaded_file.name
+        st.session_state['analysis'] = None
+        st.session_state['imgbb_url'] = None
+        st.session_state['result_image'] = None
+        st.session_state['recommendations'] = None
+        
+        img = Image.open(io.BytesIO(st.session_state['image_bytes']))
+        st.session_state['image_dims'] = img.size
+        st.rerun()
+
+if st.session_state['image_bytes']:
+    st.image(st.session_state['image_bytes'], caption="Original Room", use_container_width=True)
     
-    st.markdown('<div class="input-container">', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
-    st.markdown('</div>', unsafe_allow_html=True)
+    room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
+    selected_room_type = st.selectbox("Room Type", room_type_options, label_visibility="collapsed")
     
-    if uploaded_file:
-        if uploaded_file.name != st.session_state['last_file_name']:
-            st.session_state['image_bytes'] = uploaded_file.getvalue()
-            st.session_state['last_file_name'] = uploaded_file.name
-            st.session_state['analysis'] = None
-            st.session_state['imgbb_url'] = None
-            st.session_state['result_image'] = None
-            st.session_state['recommendations'] = None
+    if st.button("🔍 Analyze Room"):
+        with st.spinner("Analyzing room structure..."):
+            img_obj = Image.open(io.BytesIO(st.session_state['image_bytes']))
+            analysis = analyze_room(img_obj)
             
-            img = Image.open(io.BytesIO(st.session_state['image_bytes']))
-            st.session_state['image_dims'] = img.size
-            st.rerun()
-
-    if st.session_state['image_bytes']:
-        st.markdown('<div class="input-container">', unsafe_allow_html=True)
-        st.image(st.session_state['image_bytes'], caption="รูปห้องต้นฉบับ", use_container_width=True)
-        
-        room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
-        selected_room_type = st.selectbox("ระบุประเภทห้อง", room_type_options)
-        
-        if st.button("🔍 วิเคราะห์ห้อง"):
-            with st.spinner("AI กำลังวิเคราะห์โครงสร้างห้อง..."):
-                img_obj = Image.open(io.BytesIO(st.session_state['image_bytes']))
-                analysis = analyze_room(img_obj)
-                
-                if "room_metadata" in analysis:
-                    analysis["room_metadata"]["room_type"] = selected_room_type
-                
-                st.session_state['analysis'] = analysis
-                st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
-                st.success("✅ วิเคราะห์เสร็จสมบูรณ์!")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-
-with col2:
-    st.markdown('<h3 class="section-title">✨ ขั้นตอนที่ 2: เลือกสไตล์และออกแบบ</h3>', unsafe_allow_html=True)
-    
-    if st.session_state['analysis']:
-        st.markdown('<div class="input-container">', unsafe_allow_html=True)
-        
-        analysis = st.session_state['analysis']
-        room_type = analysis.get("room_metadata", {}).get("room_type", "unknown")
-        
-        st.markdown(f"**✓ ห้องที่ตรวจพบ:** {room_type}")
-        
-        with st.expander("📋 ดูรายละเอียด JSON", expanded=False):
-            st.json(analysis)
-        
-        st.markdown("---")
-        
-        interior_style = st.selectbox(
-            "เลือกสไตล์การออกแบบ",
-            ["Minimalist", "Modern Luxury", "Industrial", "Scandinavian", "Japanese Zen", "Bohemian"]
-        )
-        st.session_state['selected_style'] = interior_style
-        
-        custom_prompt = st.text_area("คำแนะนำเพิ่มเติม (ถ้ามี)", placeholder="เช่น 'เน้นสีขาวและไม้', 'เพิ่มต้นไม้เยอะๆ'", height=80)
-        
-        if st.button("✨ เริ่มออกแบบห้องใหม่"):
-            if not st.session_state['imgbb_url']:
-                with st.spinner("กำลังอัปโหลดรูปภาพ..."):
-                    st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
+            if "room_metadata" in analysis:
+                analysis["room_metadata"]["room_type"] = selected_room_type
             
-            if st.session_state['imgbb_url']:
-                with st.spinner(f"AI กำลังสร้างห้องสไตล์ {interior_style}..."):
-                    metadata = analysis.get("room_metadata", {})
-                    detailed_narrative = analysis.get("detailed_narrative", "")
-                    furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
-                    
-                    design_prompt = build_design_prompt(
-                        metadata.get("room_type", "room"),
-                        interior_style,
-                        furniture_list,
-                        analysis.get("structural_elements", {}).get("walls", "white"),
-                        analysis.get("lighting_and_atmosphere", {}).get("natural_light", "unknown"),
-                        f"{custom_prompt}. {detailed_narrative}"
-                    )
-                    
-                    width, height = st.session_state['image_dims']
-                    result_url = generate_design(design_prompt, st.session_state['imgbb_url'], width, height)
-                    
-                    if result_url:
-                        st.session_state['result_image'] = result_url
-                        st.session_state['recommendations'] = recommend_furniture_and_palette(design_prompt)
-                        st.session_state['scroll_to_results'] = True
-                        st.rerun()
-                    else:
-                        st.error("ไม่สามารถสร้างรูปภาพได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง")
-            else:
-                st.error("❌ ไม่สามารถอัปโหลดรูปภาพได้")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="input-container">', unsafe_allow_html=True)
-        st.info("📌 กรุณาอัปโหลดรูปภาพและกดปุ่มวิเคราะห์ห้องก่อน")
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.session_state['analysis'] = analysis
+            st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
+            st.success("✅ Analysis Complete!")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- Auto-scroll to Results ---
-if st.session_state.get('scroll_to_results'):
-    st.session_state['scroll_to_results'] = False
-    st.markdown("""
-    <script>
-        setTimeout(function() {
-            window.scrollTo(0, document.body.scrollHeight);
-        }, 500);
-    </script>
-    """, unsafe_allow_html=True)
+# Right Column
+st.markdown('<div class="input-card">', unsafe_allow_html=True)
+st.markdown('<div class="card-title">✨ Step 2: Choose Style & Design</div>', unsafe_allow_html=True)
 
-# --- Results Display (SOLUTION CONCEPT Style) ---
+if st.session_state['analysis']:
+    analysis = st.session_state['analysis']
+    room_type = analysis.get("room_metadata", {}).get("room_type", "unknown")
+    
+    st.markdown(f"**✓ Detected Room:** {room_type}")
+    
+    with st.expander("📋 View Analysis Details", expanded=False):
+        st.json(analysis)
+    
+    st.markdown("---")
+    
+    interior_style = st.selectbox(
+        "Design Style",
+        ["Minimalist", "Modern Luxury", "Industrial", "Scandinavian", "Japanese Zen", "Bohemian"],
+        label_visibility="collapsed"
+    )
+    st.session_state['selected_style'] = interior_style
+    
+    custom_prompt = st.text_area("Additional Notes (Optional)", placeholder="e.g., 'Focus on white and wood', 'Add more plants'", height=80, label_visibility="collapsed")
+    
+    if st.button("✨ Generate Design"):
+        if not st.session_state['imgbb_url']:
+            with st.spinner("Uploading image..."):
+                st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
+        
+        if st.session_state['imgbb_url']:
+            with st.spinner(f"Creating {interior_style} design..."):
+                metadata = analysis.get("room_metadata", {})
+                detailed_narrative = analysis.get("detailed_narrative", "")
+                furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
+                
+                design_prompt = build_design_prompt(
+                    metadata.get("room_type", "room"),
+                    interior_style,
+                    furniture_list,
+                    analysis.get("structural_elements", {}).get("walls", "white"),
+                    analysis.get("lighting_and_atmosphere", {}).get("natural_light", "unknown"),
+                    f"{custom_prompt}. {detailed_narrative}"
+                )
+                
+                width, height = st.session_state['image_dims']
+                result_url = generate_design(design_prompt, st.session_state['imgbb_url'], width, height)
+                
+                if result_url:
+                    st.session_state['result_image'] = result_url
+                    st.session_state['recommendations'] = recommend_furniture_and_palette(design_prompt)
+                    st.rerun()
+                else:
+                    st.error("Unable to generate design. Please try again.")
+        else:
+            st.error("❌ Failed to upload image")
+
+else:
+    st.info("📌 Upload an image and click 'Analyze Room' to get started")
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# --- Results Display ---
 if st.session_state['result_image']:
-    st.markdown('<div class="results-wrapper">', unsafe_allow_html=True)
+    st.markdown('<div class="results-container">', unsafe_allow_html=True)
     
-    # Left Side - Images
+    # Left Side
     st.markdown('<div class="results-left">', unsafe_allow_html=True)
-    st.markdown('<div class="images-container">', unsafe_allow_html=True)
+    st.markdown('<div class="images-gallery">', unsafe_allow_html=True)
     
-    # Before Image
-    st.markdown('<div class="image-item">', unsafe_allow_html=True)
+    st.markdown('<div class="image-showcase">', unsafe_allow_html=True)
     st.markdown('<div class="image-frame">', unsafe_allow_html=True)
     st.image(st.session_state['image_bytes'], use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('<div class="image-label">BEFORE</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # After Image
-    st.markdown('<div class="image-item">', unsafe_allow_html=True)
+    st.markdown('<div class="image-showcase">', unsafe_allow_html=True)
     st.markdown('<div class="image-frame">', unsafe_allow_html=True)
     st.image(st.session_state['result_image'], use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -452,58 +602,53 @@ if st.session_state['result_image']:
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Right Side - Content
+    # Right Side
     st.markdown('<div class="results-right">', unsafe_allow_html=True)
     
-    st.markdown('<h2 class="result-title">SOLUTION CONCEPT</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="result-title">Design Solution</h2>', unsafe_allow_html=True)
     
     if st.session_state['recommendations']:
         st.markdown(f'<div class="result-description">{st.session_state["recommendations"]}</div>', unsafe_allow_html=True)
     
-    # Shopping List
     st.markdown("""
-    <div class="shopping-list">
-        <h4>Recommended Items</h4>
-        <div class="shopping-item">
-            <span class="item-name">Premium Furniture Set</span>
-            <span class="item-price">$450</span>
-            <button class="item-buy-btn">BUY</button>
+        <div class="specification-section">
+            <h3 class="spec-title">Design Specifications</h3>
+            <div class="spec-item">
+                <span class="spec-label">Design Style</span>
+                <span class="spec-value">""" + st.session_state.get('selected_style', 'N/A') + """</span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Room Type</span>
+                <span class="spec-value">""" + st.session_state.get('analysis', {}).get('room_metadata', {}).get('room_type', 'N/A') + """</span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Design Tool</span>
+                <span class="spec-value">AI Interior Studio v1.0</span>
+            </div>
         </div>
-        <div class="shopping-item">
-            <span class="item-name">Decorative Lighting</span>
-            <span class="item-price">$120</span>
-            <button class="item-buy-btn">BUY</button>
-        </div>
-        <div class="shopping-item">
-            <span class="item-name">Area Rug</span>
-            <span class="item-price">$95</span>
-            <button class="item-buy-btn">BUY</button>
-        </div>
-    </div>
     """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(f'<a href="{st.session_state["result_image"]}" target="_blank"><button class="download-button">📥 Download Design</button></a>', unsafe_allow_html=True)
     
-    # Download Button
-    st.markdown("---")
-    st.markdown(f'<div style="text-align: center; padding: 2em;"><a href="{st.session_state["result_image"]}" target="_blank"><button style="padding: 1em 2em; border-radius: 6px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); color: white; font-weight: 600; border: none; cursor: pointer; font-size: 1em;">📥 ดาวน์โหลดรูปภาพ</button></a></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
     st.title("⚙️ Settings")
     
-    if st.button("🔄 ล้างข้อมูลทั้งหมด"):
+    if st.button("🔄 Clear All Data"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
     
     st.markdown("---")
-    st.markdown("**ℹ️ เกี่ยวกับแอป**")
+    st.markdown("**About This App**")
     st.markdown("""
-    AI Interior Room Designer ช่วยให้คุณ:
-    - 📸 อัปโหลดรูปห้องของคุณ
-    - 🤖 ให้ AI วิเคราะห์โครงสร้าง
-    - 🎨 เลือกสไตล์ที่ชอบ
-    - ✨ ได้รูปห้องใหม่ที่สวยงาม
+    **AI Interior Design Studio** is a professional tool that helps you:
+    - 📸 Upload photos of your room
+    - 🤖 Analyze room structure with AI
+    - 🎨 Choose from multiple design styles
+    - ✨ Generate beautiful interior designs
+    - 💾 Download high-quality results
     """)
