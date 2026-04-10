@@ -44,15 +44,42 @@ st.markdown("""
         letter-spacing: 0.05em;
     }
     
-    /* Split Screen Result Container */
-    .result-split-container {
+    /* Input Container */
+    .input-container {
+        background: white;
+        padding: 2em;
+        border-radius: 8px;
+        margin-bottom: 1.5em;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .stButton>button {
+        width: 100%;
+        border-radius: 6px;
+        height: 2.8em;
+        background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #6b5344 0%, #4b3334 100%);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    /* Results Container */
+    .results-wrapper {
         display: grid;
         grid-template-columns: 1fr 1fr;
         min-height: 100vh;
         background: white;
+        gap: 0;
     }
     
-    .result-left {
+    .results-left {
         background: linear-gradient(135deg, #e8e4df 0%, #ddd9d4 100%);
         padding: 4em 3em;
         display: flex;
@@ -62,7 +89,7 @@ st.markdown("""
         position: relative;
     }
     
-    .result-left::before {
+    .results-left::before {
         content: 'ครูบาช่วยหมูเด้งด้วย';
         position: absolute;
         top: 2em;
@@ -72,7 +99,7 @@ st.markdown("""
         font-weight: 500;
     }
     
-    .result-right {
+    .results-right {
         background: white;
         padding: 4em 3em;
         display: flex;
@@ -80,46 +107,40 @@ st.markdown("""
         justify-content: center;
     }
     
-    .image-pair-container {
+    .images-container {
         display: flex;
-        gap: 1.5em;
+        gap: 2em;
         justify-content: center;
         flex-wrap: wrap;
     }
     
-    .image-box {
-        flex: 1;
-        min-width: 200px;
-        max-width: 280px;
+    .image-item {
+        flex: 0 1 280px;
+        text-align: center;
+    }
+    
+    .image-frame {
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
         background: white;
+        margin-bottom: 0.8em;
     }
     
-    .image-box:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
-    }
-    
-    .image-box img {
+    .image-frame img {
         width: 100%;
         height: auto;
         display: block;
     }
     
     .image-label {
-        text-align: center;
         font-size: 0.85em;
         color: #666;
-        margin-top: 0.8em;
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
     
-    /* Right Side Content */
     .result-title {
         font-size: 2.2em;
         font-weight: 700;
@@ -135,16 +156,6 @@ st.markdown("""
         margin-bottom: 1.5em;
     }
     
-    .result-description p {
-        margin-bottom: 1em;
-    }
-    
-    .result-description strong {
-        color: #2c2c2c;
-        font-weight: 600;
-    }
-    
-    /* Shopping List */
     .shopping-list {
         margin-top: 2em;
         padding-top: 1.5em;
@@ -199,52 +210,22 @@ st.markdown("""
         background: #357abd;
     }
     
-    /* Input Section Styling */
-    .input-container {
-        background: white;
-        padding: 2em;
-        border-radius: 8px;
-        margin-bottom: 1.5em;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    
-    .stButton>button {
-        width: 100%;
-        border-radius: 6px;
-        height: 2.8em;
-        background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
-        color: white;
-        font-weight: 600;
-        border: none;
-        font-size: 0.95em;
-        transition: all 0.3s ease;
-    }
-    
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #6b5344 0%, #4b3334 100%);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    
-    .stSelectbox, .stTextArea {
-        font-size: 0.95em;
-    }
-    
     /* Responsive */
     @media (max-width: 1024px) {
-        .result-split-container {
+        .results-wrapper {
             grid-template-columns: 1fr;
         }
         
-        .result-left {
+        .results-left {
             padding: 3em 2em;
             min-height: auto;
         }
         
-        .result-right {
+        .results-right {
             padding: 3em 2em;
         }
         
-        .result-left::before {
+        .results-left::before {
             top: 1.5em;
             left: 2em;
         }
@@ -255,11 +236,11 @@ st.markdown("""
             font-size: 1.6em;
         }
         
-        .image-box {
-            max-width: 100%;
+        .image-item {
+            flex: 0 1 100%;
         }
         
-        .image-pair-container {
+        .images-container {
             flex-direction: column;
         }
     }
@@ -330,10 +311,9 @@ col1, col2 = st.columns([1, 1], gap="large")
 with col1:
     st.markdown('<h3 class="section-title">📸 ขั้นตอนที่ 1: อัปโหลดรูปห้อง</h3>', unsafe_allow_html=True)
     
-    with st.container():
-        st.markdown('<div class="input-container">', unsafe_allow_html=True)
-        uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="input-container">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("เลือกรูปภาพห้องของคุณ (JPG, PNG)", type=["jpg", "jpeg", "png"])
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if uploaded_file:
         if uploaded_file.name != st.session_state['last_file_name']:
@@ -447,37 +427,40 @@ if st.session_state.get('scroll_to_results'):
 
 # --- Results Display (SOLUTION CONCEPT Style) ---
 if st.session_state['result_image']:
-    st.markdown('<div class="result-split-container">', unsafe_allow_html=True)
+    st.markdown('<div class="results-wrapper">', unsafe_allow_html=True)
     
     # Left Side - Images
-    st.markdown('<div class="result-left">', unsafe_allow_html=True)
-    st.markdown('<div class="image-pair-container">', unsafe_allow_html=True)
+    st.markdown('<div class="results-left">', unsafe_allow_html=True)
+    st.markdown('<div class="images-container">', unsafe_allow_html=True)
     
-    col_before, col_after = st.columns(2)
-    with col_before:
-        st.markdown('<div class="image-box">', unsafe_allow_html=True)
-        st.image(st.session_state['image_bytes'], use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('<div class="image-label">BEFORE</div>', unsafe_allow_html=True)
+    # Before Image
+    st.markdown('<div class="image-item">', unsafe_allow_html=True)
+    st.markdown('<div class="image-frame">', unsafe_allow_html=True)
+    st.image(st.session_state['image_bytes'], use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="image-label">BEFORE</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    with col_after:
-        st.markdown('<div class="image-box">', unsafe_allow_html=True)
-        st.image(st.session_state['result_image'], use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('<div class="image-label">AFTER</div>', unsafe_allow_html=True)
+    # After Image
+    st.markdown('<div class="image-item">', unsafe_allow_html=True)
+    st.markdown('<div class="image-frame">', unsafe_allow_html=True)
+    st.image(st.session_state['result_image'], use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="image-label">AFTER</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Right Side - Content
-    st.markdown('<div class="result-right">', unsafe_allow_html=True)
+    st.markdown('<div class="results-right">', unsafe_allow_html=True)
     
     st.markdown('<h2 class="result-title">SOLUTION CONCEPT</h2>', unsafe_allow_html=True)
     
     if st.session_state['recommendations']:
         st.markdown(f'<div class="result-description">{st.session_state["recommendations"]}</div>', unsafe_allow_html=True)
     
-    # Shopping List (Mock)
+    # Shopping List
     st.markdown("""
     <div class="shopping-list">
         <h4>Recommended Items</h4>
@@ -502,7 +485,7 @@ if st.session_state['result_image']:
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Download Button (Below the split container)
+    # Download Button
     st.markdown("---")
     st.markdown(f'<div style="text-align: center; padding: 2em;"><a href="{st.session_state["result_image"]}" target="_blank"><button style="padding: 1em 2em; border-radius: 6px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); color: white; font-weight: 600; border: none; cursor: pointer; font-size: 1em;">📥 ดาวน์โหลดรูปภาพ</button></a></div>', unsafe_allow_html=True)
 
