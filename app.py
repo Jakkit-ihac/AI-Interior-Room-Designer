@@ -575,7 +575,11 @@ if st.session_state['result_image']:
     
     st.markdown('<div class="image-showcase">', unsafe_allow_html=True)
     st.markdown('<div class="image-frame">', unsafe_allow_html=True)
-    st.image(st.session_state['result_image'], use_container_width=True)
+    if st.session_state['result_image']:
+        try:
+            st.image(st.session_state['result_image'], use_container_width=True)
+        except Exception as e:
+            st.error(f"Unable to load After image: {str(e)}")
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('<div class="image-label">AFTER</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
