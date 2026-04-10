@@ -12,13 +12,13 @@ from image_gen_utils import generate_design, recommend_furniture_and_palette
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="AI Interior Designer | Professional Design Studio",
+    page_title="AI Interior Designer",
     page_icon="🏠",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# --- Premium Editorial CSS Styling ---
+# --- Professional, High-Contrast CSS Styling ---
 st.markdown("""
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -30,103 +30,135 @@ st.markdown("""
     }
     
     html, body, [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #faf8f6 0%, #f5f1ed 100%);
+        background: #ffffff;
         font-family: 'Inter', sans-serif;
     }
     
     .main {
-        background: transparent !important;
+        background: #ffffff !important;
         padding: 0 !important;
     }
-    
-
     
     /* Input Section */
     .input-section {
         padding: 3em 2em;
         max-width: 1600px;
         margin: 0 auto;
+        background: #ffffff;
     }
     
     .section-header {
         font-family: 'Playfair Display', serif;
-        font-size: 2em;
-        font-weight: 700;
-        color: #2c2c2c;
-        margin-bottom: 2em;
+        font-size: 2.2em;
+        font-weight: 800;
+        color: #1a1a1a;
+        margin-bottom: 2.5em;
         letter-spacing: -0.01em;
+        line-height: 1.2;
     }
     
     .input-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 3em;
+        gap: 2.5em;
         margin-bottom: 3em;
     }
     
     .input-card {
-        background: white;
-        border-radius: 12px;
+        background: #ffffff;
+        border-radius: 16px;
         padding: 2.5em;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 2px solid #f0f0f0;
         transition: all 0.3s ease;
     }
     
     .input-card:hover {
-        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
-        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        border-color: #d0d0d0;
+        transform: translateY(-4px);
     }
     
     .card-title {
         font-family: 'Playfair Display', serif;
-        font-size: 1.5em;
-        font-weight: 700;
-        color: #2c2c2c;
+        font-size: 1.6em;
+        font-weight: 800;
+        color: #1a1a1a;
         margin-bottom: 1.5em;
         display: flex;
         align-items: center;
-        gap: 0.5em;
+        gap: 0.8em;
     }
     
     .stFileUploader {
-        background: linear-gradient(135deg, #f9f7f4 0%, #f5f1ed 100%);
-        border-radius: 8px;
-        padding: 1.5em;
+        background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+        border-radius: 12px;
+        padding: 2em;
         margin-bottom: 1.5em;
-        border: 2px dashed #d4ccc4;
+        border: 2px dashed #cccccc;
         transition: all 0.3s ease;
     }
     
     .stFileUploader:hover {
         border-color: #8b7355;
-        background: linear-gradient(135deg, #faf8f6 0%, #f7f3ee 100%);
+        background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
     }
     
     .stButton>button {
         width: 100%;
-        height: 3em;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
+        height: 3.2em;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
         color: white;
-        font-weight: 600;
+        font-weight: 700;
         border: none;
-        font-size: 1em;
+        font-size: 0.95em;
         letter-spacing: 0.05em;
         text-transform: uppercase;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2);
+        box-shadow: 0 6px 20px rgba(26, 26, 26, 0.2);
     }
     
     .stButton>button:hover {
-        background: linear-gradient(135deg, #6b5344 0%, #4b3334 100%);
-        box-shadow: 0 8px 24px rgba(139, 115, 85, 0.3);
+        background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
+        box-shadow: 0 10px 30px rgba(26, 26, 26, 0.3);
         transform: translateY(-2px);
     }
     
     .stSelectbox, .stTextArea {
         font-size: 0.95em;
+    }
+    
+    .stSelectbox>div>div {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        color: #1a1a1a;
+    }
+    
+    .stTextArea>div>div {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        color: #1a1a1a;
+    }
+    
+    /* Info Box */
+    .stInfo {
+        background: #f0f4ff;
+        border-left: 4px solid #4a90e2;
+        border-radius: 8px;
+        padding: 1.2em;
+        margin: 1em 0;
+    }
+    
+    .stSuccess {
+        background: #f0fdf4;
+        border-left: 4px solid #22c55e;
+        border-radius: 8px;
+        padding: 1.2em;
+        margin: 1em 0;
     }
     
     /* Results Container */
@@ -139,7 +171,7 @@ st.markdown("""
     }
     
     .results-left {
-        background: linear-gradient(135deg, #e8e4df 0%, #ddd9d4 100%);
+        background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
         padding: 5em 3em;
         display: flex;
         flex-direction: column;
@@ -147,9 +179,8 @@ st.markdown("""
         align-items: center;
         position: relative;
         overflow: hidden;
+        border-right: 1px solid #e0e0e0;
     }
-    
-
     
     .results-left::after {
         content: '';
@@ -158,7 +189,7 @@ st.markdown("""
         right: -50%;
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(139, 115, 85, 0.05) 0%, transparent 70%);
         pointer-events: none;
     }
     
@@ -177,18 +208,19 @@ st.markdown("""
     }
     
     .image-frame {
-        border-radius: 12px;
+        border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
         background: white;
         margin-bottom: 1.2em;
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         position: relative;
+        border: 1px solid #f0f0f0;
     }
     
     .image-frame:hover {
         transform: translateY(-12px);
-        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
     }
     
     .image-frame img {
@@ -199,11 +231,12 @@ st.markdown("""
     
     .image-label {
         font-family: 'Inter', sans-serif;
-        font-size: 0.8em;
-        color: #666;
-        font-weight: 600;
+        font-size: 0.85em;
+        color: #1a1a1a;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.1em;
+        margin-top: 0.8em;
     }
     
     .results-right {
@@ -215,21 +248,11 @@ st.markdown("""
         position: relative;
     }
     
-    .results-right::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, #e0dcd7, transparent);
-    }
-    
     .result-title {
         font-family: 'Playfair Display', serif;
         font-size: 2.8em;
         font-weight: 800;
-        color: #2c2c2c;
+        color: #1a1a1a;
         margin-bottom: 1.5em;
         letter-spacing: -0.02em;
         line-height: 1.2;
@@ -238,7 +261,7 @@ st.markdown("""
     .result-description {
         font-size: 0.95em;
         line-height: 1.9;
-        color: #555;
+        color: #333333;
         margin-bottom: 2em;
     }
     
@@ -247,22 +270,22 @@ st.markdown("""
     }
     
     .result-description strong {
-        color: #2c2c2c;
-        font-weight: 600;
+        color: #1a1a1a;
+        font-weight: 700;
     }
     
     /* Specification Section */
     .specification-section {
         margin-top: 2.5em;
         padding-top: 2.5em;
-        border-top: 2px solid #e0dcd7;
+        border-top: 2px solid #e0e0e0;
     }
     
     .spec-title {
         font-family: 'Playfair Display', serif;
-        font-size: 1.3em;
+        font-size: 1.2em;
         font-weight: 700;
-        color: #2c2c2c;
+        color: #1a1a1a;
         margin-bottom: 1.5em;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -273,7 +296,7 @@ st.markdown("""
         grid-template-columns: 1fr 1fr;
         gap: 1em;
         padding: 1em 0;
-        border-bottom: 1px solid #f0ebe6;
+        border-bottom: 1px solid #f0f0f0;
         align-items: center;
     }
     
@@ -282,35 +305,35 @@ st.markdown("""
     }
     
     .spec-label {
-        font-weight: 600;
-        color: #2c2c2c;
+        font-weight: 700;
+        color: #1a1a1a;
         font-size: 0.9em;
     }
     
     .spec-value {
-        color: #666;
+        color: #666666;
         font-size: 0.9em;
     }
     
     .download-button {
         margin-top: 2.5em;
         padding: 1.2em 2em;
-        background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
+        background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
         color: white;
         border: none;
-        border-radius: 8px;
-        font-weight: 600;
+        border-radius: 10px;
+        font-weight: 700;
         font-size: 0.95em;
         cursor: pointer;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2);
+        box-shadow: 0 6px 20px rgba(26, 26, 26, 0.2);
     }
     
     .download-button:hover {
-        background: linear-gradient(135deg, #6b5344 0%, #4b3334 100%);
-        box-shadow: 0 8px 24px rgba(139, 115, 85, 0.3);
+        background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
+        box-shadow: 0 10px 30px rgba(26, 26, 26, 0.3);
         transform: translateY(-2px);
     }
     
@@ -329,10 +352,6 @@ st.markdown("""
             min-height: auto;
         }
         
-        .header-title {
-            font-size: 2.5em;
-        }
-        
         .result-title {
             font-size: 2em;
         }
@@ -349,6 +368,10 @@ st.markdown("""
         
         .spec-item {
             grid-template-columns: 1fr;
+        }
+        
+        .section-header {
+            font-size: 1.8em;
         }
     }
     </style>
@@ -405,21 +428,19 @@ def upload_to_imgbb(image_bytes):
         except:
             continue
             
-    st.error("❌ ไม่สามารถอัปโหลดรูปภาพได้ กรุณาลองใหม่อีกครั้ง")
+    st.error("❌ Unable to upload image. Please try again.")
     return None
-
-
 
 # --- Main Content ---
 st.markdown('<div class="input-section">', unsafe_allow_html=True)
 
-st.markdown('<h2 class="section-header">Design Your Space</h2>', unsafe_allow_html=True)
+st.markdown('<h1 class="section-header">Design Your Space</h1>', unsafe_allow_html=True)
 
 st.markdown('<div class="input-grid">', unsafe_allow_html=True)
 
 # Left Column
 st.markdown('<div class="input-card">', unsafe_allow_html=True)
-st.markdown('<div class="card-title">📸 Step 1: Upload Your Room</div>', unsafe_allow_html=True)
+st.markdown('<div class="card-title">📸 Upload Your Room</div>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Choose an image of your room (JPG, PNG)", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
@@ -439,8 +460,9 @@ if uploaded_file:
 if st.session_state['image_bytes']:
     st.image(st.session_state['image_bytes'], caption="Original Room", use_container_width=True)
     
+    st.markdown("**Select Room Type**")
     room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
-    selected_room_type = st.selectbox("Room Type", room_type_options, label_visibility="collapsed")
+    selected_room_type = st.selectbox("", room_type_options, label_visibility="collapsed")
     
     if st.button("🔍 Analyze Room"):
         with st.spinner("Analyzing room structure..."):
@@ -458,7 +480,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # Right Column
 st.markdown('<div class="input-card">', unsafe_allow_html=True)
-st.markdown('<div class="card-title">✨ Step 2: Choose Style & Design</div>', unsafe_allow_html=True)
+st.markdown('<div class="card-title">✨ Choose Style & Design</div>', unsafe_allow_html=True)
 
 if st.session_state['analysis']:
     analysis = st.session_state['analysis']
@@ -471,14 +493,16 @@ if st.session_state['analysis']:
     
     st.markdown("---")
     
+    st.markdown("**Select Design Style**")
     interior_style = st.selectbox(
-        "Design Style",
+        "",
         ["Minimalist", "Modern Luxury", "Industrial", "Scandinavian", "Japanese Zen", "Bohemian"],
         label_visibility="collapsed"
     )
     st.session_state['selected_style'] = interior_style
     
-    custom_prompt = st.text_area("Additional Notes (Optional)", placeholder="e.g., 'Focus on white and wood', 'Add more plants'", height=80, label_visibility="collapsed")
+    st.markdown("**Additional Notes (Optional)**")
+    custom_prompt = st.text_area("", placeholder="e.g., 'Focus on white and wood', 'Add more plants'", height=80, label_visibility="collapsed")
     
     if st.button("✨ Generate Design"):
         if not st.session_state['imgbb_url']:
