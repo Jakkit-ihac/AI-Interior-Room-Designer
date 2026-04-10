@@ -659,10 +659,21 @@ if st.session_state['image_bytes']:
             
             with st.spinner("🎨 Generating your design..."):
                 try:
+                    # Extract necessary data from analysis
+                    room_type = st.session_state['selected_room_type']
+                    interior_style = st.session_state['selected_style']
+                    furniture_list = analysis.get('furniture_list', [])
+                    wall_info = analysis.get('room_metadata', {}).get('wall_color', 'neutral walls')
+                    lighting_info = analysis.get('room_metadata', {}).get('lighting', 'natural light')
+                    detailed_narrative = analysis.get('room_description', 'modern room')
+                    
                     prompt = build_design_prompt(
-                        analysis,
-                        st.session_state['selected_style'],
-                        st.session_state['selected_room_type']
+                        room_type,
+                        interior_style,
+                        furniture_list,
+                        wall_info,
+                        lighting_info,
+                        detailed_narrative
                     )
                     result_image_url = generate_design(prompt, st.session_state['image_bytes'])
                     st.session_state['result_image'] = result_image_url
