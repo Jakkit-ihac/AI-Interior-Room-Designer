@@ -39,48 +39,7 @@ st.markdown("""
         padding: 0 !important;
     }
     
-    /* Header Section */
-    .header-section {
-        background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
-        color: white;
-        padding: 4em 3em;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .header-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at 20% 50%, rgba(139, 115, 85, 0.1) 0%, transparent 50%);
-        pointer-events: none;
-    }
-    
-    .header-content {
-        position: relative;
-        z-index: 1;
-    }
-    
-    .header-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 3.5em;
-        font-weight: 800;
-        margin-bottom: 0.5em;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-    }
-    
-    .header-subtitle {
-        font-size: 1.1em;
-        font-weight: 300;
-        color: rgba(255, 255, 255, 0.8);
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-    }
+
     
     /* Input Section */
     .input-section {
@@ -458,15 +417,7 @@ def upload_to_imgbb(image_bytes):
     st.error("❌ ไม่สามารถอัปโหลดรูปภาพได้ กรุณาลองใหม่อีกครั้ง")
     return None
 
-# --- Header ---
-st.markdown("""
-    <div class="header-section">
-        <div class="header-content">
-            <h1 class="header-title">AI Interior Design Studio</h1>
-            <p class="header-subtitle">Transform Your Space with Artificial Intelligence</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+
 
 # --- Main Content ---
 st.markdown('<div class="input-section">', unsafe_allow_html=True)
