@@ -18,9 +18,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- Professional, High-Contrast CSS Styling ---
+# --- Premium Interior Design Studio CSS Styling ---
 st.markdown("""
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
     * {
@@ -30,73 +30,199 @@ st.markdown("""
     }
     
     html, body, [data-testid="stAppViewContainer"] {
-        background: #ffffff;
+        background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
         font-family: 'Inter', sans-serif;
     }
     
     .main {
-        background: #ffffff !important;
+        background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%) !important;
         padding: 0 !important;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        color: white;
+        padding: 6em 2em;
+        text-align: center;
+        border-bottom: 1px solid rgba(212, 175, 110, 0.3);
+    }
+    
+    .hero-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 3.5em;
+        font-weight: 900;
+        margin-bottom: 0.8em;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #d4af6e 0%, #e8c547 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.3em;
+        font-weight: 300;
+        color: #cccccc;
+        margin-bottom: 2em;
+        letter-spacing: 0.05em;
+    }
+    
+    .hero-cta {
+        display: inline-block;
+        padding: 1em 2.5em;
+        background: linear-gradient(135deg, #d4af6e 0%, #e8c547 100%);
+        color: #1a1a1a;
+        border: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(212, 175, 110, 0.3);
+    }
+    
+    .hero-cta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(212, 175, 110, 0.4);
+    }
+    
+    /* Steps Guide */
+    .steps-guide {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2em;
+        padding: 4em 2em;
+        max-width: 1400px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+    }
+    
+    .step-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5em;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .step-card::before {
+        content: attr(data-step);
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #d4af6e 0%, #e8c547 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #1a1a1a;
+        font-size: 1.2em;
+    }
+    
+    .step-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        border-color: #d4af6e;
+    }
+    
+    .step-icon {
+        font-size: 3em;
+        margin-bottom: 1em;
+    }
+    
+    .step-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5em;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 0.8em;
+    }
+    
+    .step-description {
+        font-size: 0.95em;
+        color: #666666;
+        line-height: 1.6;
     }
     
     /* Input Section */
     .input-section {
-        padding: 2em 2em;
-        max-width: 1600px;
+        padding: 3em 2em;
+        max-width: 1400px;
         margin: 0 auto;
-        background: #ffffff;
+        background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
     }
     
     .section-header {
         font-family: 'Playfair Display', serif;
-        font-size: 2.2em;
+        font-size: 2.5em;
         font-weight: 800;
         color: #1a1a1a !important;
         margin-bottom: 2.5em;
         letter-spacing: -0.01em;
         line-height: 1.2;
+        text-align: center;
     }
     
-    h1, h2, h3, h4, h5, h6 {
-        color: #1a1a1a !important;
-        font-weight: 700 !important;
-    }
-    
-    [data-testid="stMarkdownContainer"] h1,
-    [data-testid="stMarkdownContainer"] h2,
-    [data-testid="stMarkdownContainer"] h3 {
-        color: #1a1a1a !important;
-    }
-    
-    .stMarkdown {
-        color: #333333 !important;
+    .section-header::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(135deg, #d4af6e 0%, #e8c547 100%);
+        margin: 1em auto 0;
+        border-radius: 2px;
     }
     
     .input-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 2.5em;
+        gap: 3em;
         margin-bottom: 2em;
     }
     
     .input-card {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 2.5em;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-        border: 1px solid #e8e8e8;
-        transition: all 0.3s ease;
+        background: white;
+        border-radius: 20px;
+        padding: 3em;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        border: 2px solid #f5f5f5;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .input-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 110, 0.1), transparent);
+        transition: left 0.5s ease;
     }
     
     .input-card:hover {
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-        border-color: #d0d0d0;
-        transform: translateY(-4px);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+        border-color: #d4af6e;
+    }
+    
+    .input-card:hover::before {
+        left: 100%;
     }
     
     .card-title {
         font-family: 'Playfair Display', serif;
-        font-size: 1.6em;
+        font-size: 1.8em;
         font-weight: 800;
         color: #1a1a1a !important;
         margin-bottom: 1.5em;
@@ -106,38 +232,39 @@ st.markdown("""
     }
     
     .stFileUploader {
-        background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
-        border-radius: 12px;
-        padding: 2em;
+        background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+        border-radius: 16px;
+        padding: 2.5em;
         margin-bottom: 1.5em;
-        border: 2px dashed #cccccc;
+        border: 2px dashed #d4af6e;
         transition: all 0.3s ease;
     }
     
     .stFileUploader:hover {
-        border-color: #8b7355;
-        background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+        border-color: #e8c547;
+        background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+        box-shadow: 0 8px 20px rgba(212, 175, 110, 0.15);
     }
     
     .stButton>button {
         width: 100%;
-        height: 3.2em;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
-        color: white;
+        height: 3.5em;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #d4af6e 0%, #e8c547 100%);
+        color: #1a1a1a;
         font-weight: 700;
         border: none;
-        font-size: 0.95em;
+        font-size: 1em;
         letter-spacing: 0.05em;
         text-transform: uppercase;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 6px 20px rgba(26, 26, 26, 0.2);
+        box-shadow: 0 8px 25px rgba(212, 175, 110, 0.25);
     }
     
     .stButton>button:hover {
-        background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
-        box-shadow: 0 10px 30px rgba(26, 26, 26, 0.3);
+        background: linear-gradient(135deg, #e8c547 0%, #d4af6e 100%);
+        box-shadow: 0 12px 35px rgba(212, 175, 110, 0.35);
         transform: translateY(-2px);
     }
     
@@ -147,33 +274,33 @@ st.markdown("""
     
     .stSelectbox>div>div {
         background: white;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        color: #1a1a1a;
+        border: 2px solid #e8e8e8;
+        border-radius: 10px;
+        color: #1a1a1a !important;
     }
     
     .stTextArea>div>div {
         background: white;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        color: #1a1a1a;
+        border: 2px solid #e8e8e8;
+        border-radius: 10px;
+        color: #1a1a1a !important;
     }
     
     /* Info Box */
     .stInfo {
-        background: #f0f4ff;
-        border-left: 4px solid #4a90e2;
-        border-radius: 8px;
-        padding: 1.2em;
-        margin: 1em 0;
+        background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 100%);
+        border-left: 4px solid #d4af6e;
+        border-radius: 12px;
+        padding: 1.5em;
+        margin: 1.5em 0;
     }
     
     .stSuccess {
-        background: #f0fdf4;
+        background: linear-gradient(135deg, #f0fdf4 0%, #f5fff0 100%);
         border-left: 4px solid #22c55e;
-        border-radius: 8px;
-        padding: 1.2em;
-        margin: 1em 0;
+        border-radius: 12px;
+        padding: 1.5em;
+        margin: 1.5em 0;
     }
     
     /* Results Container */
@@ -194,7 +321,7 @@ st.markdown("""
         align-items: center;
         position: relative;
         overflow: hidden;
-        border-right: 1px solid #e0e0e0;
+        border-right: 2px solid #e8e8e8;
     }
     
     .results-left::after {
@@ -204,13 +331,13 @@ st.markdown("""
         right: -50%;
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle, rgba(139, 115, 85, 0.05) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(212, 175, 110, 0.08) 0%, transparent 70%);
         pointer-events: none;
     }
     
     .images-gallery {
         display: flex;
-        gap: 2.5em;
+        gap: 3em;
         justify-content: center;
         flex-wrap: wrap;
         position: relative;
@@ -218,24 +345,24 @@ st.markdown("""
     }
     
     .image-showcase {
-        flex: 0 1 320px;
+        flex: 0 1 340px;
         text-align: center;
     }
     
     .image-frame {
-        border-radius: 16px;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.18);
         background: white;
-        margin-bottom: 1.2em;
+        margin-bottom: 1.5em;
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         position: relative;
-        border: 1px solid #f0f0f0;
+        border: 2px solid #f0f0f0;
     }
     
     .image-frame:hover {
-        transform: translateY(-12px);
-        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+        transform: translateY(-15px);
+        box-shadow: 0 35px 90px rgba(0, 0, 0, 0.25);
     }
     
     .image-frame img {
@@ -245,13 +372,17 @@ st.markdown("""
     }
     
     .image-label {
-        font-family: 'Inter', sans-serif;
-        font-size: 0.85em;
-        color: #1a1a1a;
+        font-family: 'Playfair Display', serif;
+        font-size: 0.9em;
+        color: #1a1a1a !important;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-top: 0.8em;
+        letter-spacing: 0.15em;
+        margin-top: 1em;
+        background: linear-gradient(135deg, #d4af6e 0%, #e8c547 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     .results-right {
@@ -261,56 +392,57 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
         position: relative;
+        overflow-y: auto;
     }
     
     .result-title {
         font-family: 'Playfair Display', serif;
-        font-size: 2.8em;
+        font-size: 3em;
         font-weight: 800;
-        color: #1a1a1a;
+        color: #1a1a1a !important;
         margin-bottom: 1.5em;
         letter-spacing: -0.02em;
         line-height: 1.2;
     }
     
     .result-description {
-        font-size: 0.95em;
-        line-height: 1.9;
-        color: #333333;
-        margin-bottom: 2em;
+        font-size: 1em;
+        line-height: 2;
+        color: #333333 !important;
+        margin-bottom: 2.5em;
     }
     
     .result-description p {
-        margin-bottom: 1.2em;
+        margin-bottom: 1.5em;
     }
     
     .result-description strong {
-        color: #1a1a1a;
+        color: #1a1a1a !important;
         font-weight: 700;
     }
     
     /* Specification Section */
     .specification-section {
-        margin-top: 2.5em;
-        padding-top: 2.5em;
-        border-top: 2px solid #e0e0e0;
+        margin-top: 3em;
+        padding-top: 3em;
+        border-top: 2px solid #e8e8e8;
     }
     
     .spec-title {
         font-family: 'Playfair Display', serif;
-        font-size: 1.2em;
+        font-size: 1.3em;
         font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 1.5em;
+        color: #1a1a1a !important;
+        margin-bottom: 2em;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
     }
     
     .spec-item {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1em;
-        padding: 1em 0;
+        gap: 1.5em;
+        padding: 1.2em 0;
         border-bottom: 1px solid #f0f0f0;
         align-items: center;
     }
@@ -321,35 +453,50 @@ st.markdown("""
     
     .spec-label {
         font-weight: 700;
-        color: #1a1a1a;
-        font-size: 0.9em;
+        color: #1a1a1a !important;
+        font-size: 0.95em;
     }
     
     .spec-value {
-        color: #666666;
-        font-size: 0.9em;
+        color: #666666 !important;
+        font-size: 0.95em;
     }
     
     .download-button {
-        margin-top: 2.5em;
-        padding: 1.2em 2em;
-        background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
-        color: white;
+        margin-top: 3em;
+        padding: 1.3em 2.5em;
+        background: linear-gradient(135deg, #d4af6e 0%, #e8c547 100%);
+        color: #1a1a1a;
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
         font-weight: 700;
-        font-size: 0.95em;
+        font-size: 1em;
         cursor: pointer;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         transition: all 0.3s ease;
-        box-shadow: 0 6px 20px rgba(26, 26, 26, 0.2);
+        box-shadow: 0 8px 25px rgba(212, 175, 110, 0.25);
     }
     
     .download-button:hover {
-        background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
-        box-shadow: 0 10px 30px rgba(26, 26, 26, 0.3);
+        background: linear-gradient(135deg, #e8c547 0%, #d4af6e 100%);
+        box-shadow: 0 12px 35px rgba(212, 175, 110, 0.35);
         transform: translateY(-2px);
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: #1a1a1a !important;
+        font-weight: 700 !important;
+    }
+    
+    [data-testid="stMarkdownContainer"] h1,
+    [data-testid="stMarkdownContainer"] h2,
+    [data-testid="stMarkdownContainer"] h3 {
+        color: #1a1a1a !important;
+    }
+    
+    .stMarkdown {
+        color: #333333 !important;
     }
     
     /* Responsive */
@@ -368,7 +515,15 @@ st.markdown("""
         }
         
         .result-title {
-            font-size: 2em;
+            font-size: 2.2em;
+        }
+        
+        .steps-guide {
+            grid-template-columns: 1fr;
+        }
+        
+        .hero-title {
+            font-size: 2.5em;
         }
     }
     
@@ -406,157 +561,123 @@ def init_session():
         st.session_state['result_image'] = None
     if 'recommendations' not in st.session_state:
         st.session_state['recommendations'] = None
-    if 'image_dims' not in st.session_state:
-        st.session_state['image_dims'] = (1024, 768)
     if 'selected_style' not in st.session_state:
         st.session_state['selected_style'] = None
+    if 'selected_room_type' not in st.session_state:
+        st.session_state['selected_room_type'] = None
+    if 'show_hero' not in st.session_state:
+        st.session_state['show_hero'] = True
 
 init_session()
 
-# --- Helper Function: Upload Image to ImgBB ---
-def upload_to_imgbb(image_bytes):
-    if not image_bytes:
-        return None
+# --- Hero Section ---
+if st.session_state['show_hero'] and not st.session_state['result_image']:
+    st.markdown("""
+        <div class="hero-section">
+            <h1 class="hero-title">AI Interior Studio</h1>
+            <p class="hero-subtitle">Transform Your Space with Intelligent Design</p>
+        </div>
+    """, unsafe_allow_html=True)
     
-    api_keys = [
-        "533f07276d994ec8350b6177fb133a0d",
-        "6d207e021112d492d03f842280a32101",
-        "c8798933668868868868868868868868",
-        "e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6",
-        "u7v8w9x0y1z2a3b4c5d6e7f8g9h0i1j2"
-    ]
-    
-    for api_key in api_keys:
-        try:
-            url = "https://api.imgbb.com/1/upload"
-            payload = {
-                "key": api_key,
-                "image": base64.b64encode(image_bytes),
-            }
-            res = requests.post(url, payload, timeout=15)
-            if res.status_code == 200:
-                return res.json()["data"]["url"]
-            elif res.status_code == 400 and "quota exceeded" in res.text.lower():
-                continue
-            else:
-                continue
-        except:
-            continue
-            
-    st.error("❌ Unable to upload image. Please try again.")
-    return None
+    # Steps Guide
+    st.markdown("""
+        <div class="steps-guide">
+            <div class="step-card" data-step="1">
+                <div class="step-icon">📸</div>
+                <h3 class="step-title">Upload Your Room</h3>
+                <p class="step-description">Share a photo of your space and let our AI analyze every detail</p>
+            </div>
+            <div class="step-card" data-step="2">
+                <div class="step-icon">✨</div>
+                <h3 class="step-title">Choose Your Style</h3>
+                <p class="step-description">Select from curated design styles that match your vision</p>
+            </div>
+            <div class="step-card" data-step="3">
+                <div class="step-icon">🎨</div>
+                <h3 class="step-title">Get Your Design</h3>
+                <p class="step-description">Receive AI-generated design proposals with recommendations</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
-# --- Main Content ---
+# --- Input Section ---
 st.markdown('<div class="input-section">', unsafe_allow_html=True)
+st.markdown('<h2 class="section-header">Design Your Space</h2>', unsafe_allow_html=True)
 
-st.markdown('<h1 class="section-header">Design Your Space</h1>', unsafe_allow_html=True)
+col1, col2 = st.columns(2)
 
-st.markdown('<div class="input-grid">', unsafe_allow_html=True)
-
-# Left Column
-st.markdown('<div class="input-card">', unsafe_allow_html=True)
-st.markdown('<div class="card-title">📸 Upload Your Room</div>', unsafe_allow_html=True)
-
-uploaded_file = st.file_uploader("Choose an image of your room (JPG, PNG)", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
-
-if uploaded_file:
-    if uploaded_file.name != st.session_state['last_file_name']:
+with col1:
+    st.markdown('<div class="input-card">', unsafe_allow_html=True)
+    st.markdown('<h3 class="card-title">📸 Upload Your Room</h3>', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("Choose a room image", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+    
+    if uploaded_file:
         st.session_state['image_bytes'] = uploaded_file.getvalue()
         st.session_state['last_file_name'] = uploaded_file.name
-        st.session_state['analysis'] = None
-        st.session_state['imgbb_url'] = None
-        st.session_state['result_image'] = None
-        st.session_state['recommendations'] = None
-        
-        img = Image.open(io.BytesIO(st.session_state['image_bytes']))
-        st.session_state['image_dims'] = img.size
-        st.rerun()
+        st.success("✓ Image uploaded successfully!")
+    st.markdown('</div>', unsafe_allow_html=True)
 
+with col2:
+    st.markdown('<div class="input-card">', unsafe_allow_html=True)
+    st.markdown('<h3 class="card-title">✨ Choose Style & Room</h3>', unsafe_allow_html=True)
+    
+    col_style, col_room = st.columns(2)
+    with col_style:
+        selected_style = st.selectbox(
+            "Design Style",
+            ["Modern", "Minimalist", "Luxury", "Scandinavian", "Industrial", "Bohemian"],
+            label_visibility="collapsed"
+        )
+        st.session_state['selected_style'] = selected_style
+    
+    with col_room:
+        selected_room_type = st.selectbox(
+            "Room Type",
+            ["Bedroom", "Living Room", "Kitchen", "Bathroom", "Office", "Dining Room"],
+            label_visibility="collapsed"
+        )
+        st.session_state['selected_room_type'] = selected_room_type
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# --- Analyze and Generate Button ---
 if st.session_state['image_bytes']:
-    st.image(st.session_state['image_bytes'], caption="Original Room", use_container_width=True)
-    
-    st.markdown("**Select Room Type**")
-    room_type_options = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office", "Dining Room", "Studio"]
-    selected_room_type = st.selectbox("", room_type_options, label_visibility="collapsed")
-    
-    if st.button("🔍 Analyze Room"):
-        with st.spinner("Analyzing room structure..."):
-            img_obj = Image.open(io.BytesIO(st.session_state['image_bytes']))
-            analysis = analyze_room(img_obj)
+    col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
+    with col_btn2:
+        if st.button("🚀 Analyze & Design", use_container_width=True):
+            st.session_state['show_hero'] = False
             
-            if "room_metadata" in analysis:
-                analysis["room_metadata"]["room_type"] = selected_room_type
+            with st.spinner("🔍 Analyzing your room..."):
+                try:
+                    analysis = analyze_room(st.session_state['image_bytes'])
+                    st.session_state['analysis'] = analysis
+                except Exception as e:
+                    st.error(f"Error analyzing room: {str(e)}")
+                    st.stop()
             
-            st.session_state['analysis'] = analysis
-            st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
-            st.success("✅ Analysis Complete!")
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Right Column
-st.markdown('<div class="input-card">', unsafe_allow_html=True)
-st.markdown('<div class="card-title">✨ Choose Style & Design</div>', unsafe_allow_html=True)
-
-if st.session_state['analysis']:
-    analysis = st.session_state['analysis']
-    room_type = analysis.get("room_metadata", {}).get("room_type", "unknown")
-    
-    st.markdown(f"**✓ Detected Room:** {room_type}")
-    
-    with st.expander("📋 View Analysis Details", expanded=False):
-        st.json(analysis)
-    
-    st.markdown("---")
-    
-    st.markdown("**Select Design Style**")
-    interior_style = st.selectbox(
-        "",
-        ["Minimalist", "Modern Luxury", "Industrial", "Scandinavian", "Japanese Zen", "Bohemian"],
-        label_visibility="collapsed"
-    )
-    st.session_state['selected_style'] = interior_style
-    
-    st.markdown("**Additional Notes (Optional)**")
-    custom_prompt = st.text_area("", placeholder="e.g., 'Focus on white and wood', 'Add more plants'", height=80, label_visibility="collapsed")
-    
-    if st.button("✨ Generate Design"):
-        if not st.session_state['imgbb_url']:
-            with st.spinner("Uploading image..."):
-                st.session_state['imgbb_url'] = upload_to_imgbb(st.session_state['image_bytes'])
-        
-        if st.session_state['imgbb_url']:
-            with st.spinner(f"Creating {interior_style} design..."):
-                metadata = analysis.get("room_metadata", {})
-                detailed_narrative = analysis.get("detailed_narrative", "")
-                furniture_list = [f"{f.get('item')} at {f.get('position')}" for f in analysis.get("furniture_mapping", [])]
-                
-                design_prompt = build_design_prompt(
-                    metadata.get("room_type", "room"),
-                    interior_style,
-                    furniture_list,
-                    analysis.get("structural_elements", {}).get("walls", "white"),
-                    analysis.get("lighting_and_atmosphere", {}).get("natural_light", "unknown"),
-                    f"{custom_prompt}. {detailed_narrative}"
-                )
-                
-                width, height = st.session_state['image_dims']
-                result_url = generate_design(design_prompt, st.session_state['imgbb_url'], width, height)
-                
-                if result_url:
-                    st.session_state['result_image'] = result_url
-                    st.session_state['recommendations'] = recommend_furniture_and_palette(design_prompt)
-                    st.rerun()
-                else:
-                    st.error("Unable to generate design. Please try again.")
-        else:
-            st.error("❌ Failed to upload image")
-
-else:
-    st.info("📌 Upload an image and click 'Analyze Room' to get started")
-
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+            with st.spinner("🎨 Generating your design..."):
+                try:
+                    prompt = build_design_prompt(
+                        analysis,
+                        st.session_state['selected_style'],
+                        st.session_state['selected_room_type']
+                    )
+                    result_image_url = generate_design(prompt, st.session_state['image_bytes'])
+                    st.session_state['result_image'] = result_image_url
+                except Exception as e:
+                    st.error(f"Error generating design: {str(e)}")
+                    st.stop()
+            
+            with st.spinner("💡 Creating recommendations..."):
+                try:
+                    recommendations = recommend_furniture_and_palette(analysis, st.session_state['selected_style'])
+                    st.session_state['recommendations'] = recommendations
+                except Exception as e:
+                    st.warning("Could not generate recommendations, but design is ready!")
+            
+            st.rerun()
 
 # --- Results Display ---
 if st.session_state['result_image']:
@@ -604,11 +725,11 @@ if st.session_state['result_image']:
             </div>
             <div class="spec-item">
                 <span class="spec-label">Room Type</span>
-                <span class="spec-value">""" + st.session_state.get('analysis', {}).get('room_metadata', {}).get('room_type', 'N/A') + """</span>
+                <span class="spec-value">""" + st.session_state.get('selected_room_type', 'N/A') + """</span>
             </div>
             <div class="spec-item">
                 <span class="spec-label">Design Tool</span>
-                <span class="spec-value">AI Interior Studio v1.0</span>
+                <span class="spec-value">AI Interior Studio v2.0</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -623,17 +744,23 @@ with st.sidebar:
     st.title("⚙️ Settings")
     
     if st.button("🔄 Clear All Data"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
+        st.session_state['image_bytes'] = None
+        st.session_state['last_file_name'] = None
+        st.session_state['analysis'] = None
+        st.session_state['imgbb_url'] = None
+        st.session_state['result_image'] = None
+        st.session_state['recommendations'] = None
+        st.session_state['selected_style'] = None
+        st.session_state['selected_room_type'] = None
+        st.session_state['show_hero'] = True
         st.rerun()
     
     st.markdown("---")
-    st.markdown("**About This App**")
+    st.markdown("### About")
     st.markdown("""
-    **AI Interior Design Studio** is a professional tool that helps you:
-    - 📸 Upload photos of your room
-    - 🤖 Analyze room structure with AI
-    - 🎨 Choose from multiple design styles
-    - ✨ Generate beautiful interior designs
-    - 💾 Download high-quality results
+    **AI Interior Studio** is a professional interior design tool powered by advanced AI models.
+    
+    - 📸 AI-powered room analysis
+    - 🎨 Intelligent design generation
+    - ✨ Personalized recommendations
     """)
