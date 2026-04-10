@@ -41,7 +41,7 @@ st.markdown("""
     
     /* Input Section */
     .input-section {
-        padding: 3em 2em;
+        padding: 2em 2em;
         max-width: 1600px;
         margin: 0 auto;
         background: #ffffff;
@@ -51,25 +51,40 @@ st.markdown("""
         font-family: 'Playfair Display', serif;
         font-size: 2.2em;
         font-weight: 800;
-        color: #1a1a1a;
+        color: #1a1a1a !important;
         margin-bottom: 2.5em;
         letter-spacing: -0.01em;
         line-height: 1.2;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: #1a1a1a !important;
+        font-weight: 700 !important;
+    }
+    
+    [data-testid="stMarkdownContainer"] h1,
+    [data-testid="stMarkdownContainer"] h2,
+    [data-testid="stMarkdownContainer"] h3 {
+        color: #1a1a1a !important;
+    }
+    
+    .stMarkdown {
+        color: #333333 !important;
     }
     
     .input-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 2.5em;
-        margin-bottom: 3em;
+        margin-bottom: 2em;
     }
     
     .input-card {
         background: #ffffff;
         border-radius: 16px;
         padding: 2.5em;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        border: 2px solid #f0f0f0;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e8e8e8;
         transition: all 0.3s ease;
     }
     
@@ -83,7 +98,7 @@ st.markdown("""
         font-family: 'Playfair Display', serif;
         font-size: 1.6em;
         font-weight: 800;
-        color: #1a1a1a;
+        color: #1a1a1a !important;
         margin-bottom: 1.5em;
         display: flex;
         align-items: center;
