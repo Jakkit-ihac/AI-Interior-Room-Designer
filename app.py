@@ -149,16 +149,7 @@ st.markdown("""
         overflow: hidden;
     }
     
-    .results-left::before {
-        content: 'ครูบาช่วยหมูเด้งด้วย';
-        position: absolute;
-        top: 2.5em;
-        left: 3em;
-        font-size: 0.8em;
-        color: #2c2c2c;
-        font-weight: 500;
-        letter-spacing: 0.05em;
-    }
+
     
     .results-left::after {
         content: '';
