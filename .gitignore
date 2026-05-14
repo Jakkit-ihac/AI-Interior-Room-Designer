@@ -1,1 +1,11 @@
 .env
+.env.example
+venv/
+__pycache__/
+*.pyc
+.streamlit/
+*.egg-info/
+dist/
+build/
+.DS_Store
+*.log
