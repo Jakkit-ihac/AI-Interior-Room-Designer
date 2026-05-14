@@ -1,5 +1,15 @@
 import os
-import google.generativeai as genai
+
+# Updated import - handle deprecated google.generativeai
+try:
+    import google.generativeai as genai
+except ImportError:
+    try:
+        from google import genai as genai_module
+        genai = genai_module
+    except ImportError:
+        genai = None
+
 from PIL import Image
 import json
 import re
@@ -98,6 +108,10 @@ def detect_products_in_room(image_input) -> Dict:
     
     if not api_key:
         print("⚠️ GOOGLE_API_KEY not found - using default products")
+        return default_response
+    
+    if not genai:
+        print("⚠️ genai module not available - using default products")
         return default_response
     
     try:

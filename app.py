@@ -2,7 +2,16 @@ import streamlit as st
 from PIL import Image
 import os, base64, io, requests
 from dotenv import load_dotenv
-import google.generativeai as genai
+
+# Updated import - use google.genai instead of deprecated google.generativeai
+try:
+    import google.generativeai as genai
+except ImportError:
+    try:
+        from google import genai
+    except ImportError:
+        genai = None
+
 import urllib.parse
 import time
 from product_shopping_utils import detect_products_in_room, get_product_suggestions, calculate_total_budget, get_product_by_id
@@ -24,12 +33,15 @@ except ImportError:
 # โหลด Environment Variables
 load_dotenv()
 
-st.set_page_config(
-    page_title="AI Room Designer | Create Your Empty Room", 
-    page_icon="🛋️", 
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+try:
+    st.set_page_config(
+        page_title="AI Room Designer | Create Your Empty Room", 
+        page_icon="🛋️", 
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+except Exception as e:
+    st.error(f"❌ Error configuring page: {e}")
 
 # --- Professional CSS ---
 st.markdown("""
@@ -640,7 +652,7 @@ def generate_with_fallback(prompt_text: str):
     api_key = os.environ.get("GOOGLE_API_KEY")
     
     # 1️⃣ ลองใช้ Gemini ก่อน
-    if api_key:
+    if api_key and genai:
         try:
             st.write("🔄 ลองใช้ Gemini AI...")
             genai.configure(api_key=api_key)
