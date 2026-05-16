@@ -6,6 +6,7 @@ import requests
 import urllib.parse
 from dotenv import load_dotenv
 import time
+from datetime import datetime
 
 # ==========================================
 # 📦 การนำเข้าโมดูล & การจัดการ Library
@@ -112,7 +113,8 @@ def calculate_auto_layout(num_items):
 default_states = {
     'base_room': None, 'ai_room_img': None, 'final_image': None,
     'decor_items': [], 'uploaded_decor_names': [],
-    'base_prompt': "", 'current_prompt': ""
+    'base_prompt': "", 'current_prompt': "",
+    'detected_products': None, 'shopping_suggestions': None, 'shopping_scan_time': None
 }
 for k, v in default_states.items():
     if k not in st.session_state: st.session_state[k] = v
@@ -259,28 +261,47 @@ with right_panel:
         # 🛒 ระบบช้อปปิ้งออนไลน์
         # ------------------------------------------
         st.markdown('<br><div class="panel-title">🛒 ช้อปปิ้งเฟอร์นิเจอร์ในห้อง (AI Recommendations)</div>', unsafe_allow_html=True)
-        if SHOPPING_READY:
-            with st.spinner("🤖 Gemini กำลังสแกนรูปเพื่อค้นหาสินค้า..."):
-                detected = detect_products_in_room(st.session_state.final_image)
-                suggestions = get_product_suggestions(detected.get('detected_products', []))
-                
-                if suggestions:
+
+        scan_button = st.button("🔍 วิเคราะห์สินค้าในรูปและแสดงลิงก์", use_container_width=True)
+        if scan_button or st.session_state.shopping_suggestions is not None:
+            if scan_button:
+                with st.spinner("🤖 กำลังวิเคราะห์ภาพและค้นหาสินค้า..."):
+                    detected = detect_products_in_room(st.session_state.final_image)
+                    suggestions = get_product_suggestions(detected.get('detected_products', []))
+                    st.session_state.detected_products = detected
+                    st.session_state.shopping_suggestions = suggestions
+                    st.session_state.shopping_scan_time = datetime.now().strftime("%H:%M:%S")
+            else:
+                detected = st.session_state.detected_products or {}
+                suggestions = st.session_state.shopping_suggestions or {}
+
+            if detected:
+                room_desc = detected.get('room_description', 'ไม่ระบุ')
+                total_items = detected.get('total_items', 0)
+                st.markdown(f"<p style='color:#475569; font-size:0.95rem;'>ผลการวิเคราะห์ล่าสุด: {total_items} ชิ้น, บรรยายห้อง: {room_desc}</p>", unsafe_allow_html=True)
+                if st.session_state.shopping_scan_time:
+                    st.markdown(f"<p style='color:#94A3B8; font-size:0.85rem; margin-top:-10px;'>วิเคราะห์เมื่อ {st.session_state.shopping_scan_time}</p>", unsafe_allow_html=True)
+            else:
+                st.info("ℹ️ ยังไม่มีผลการวิเคราะห์สินค้า")
+
+            if suggestions:
+                for cat, items in suggestions.items():
+                    st.markdown(f"<h4 style='margin-bottom:0.4rem; color:#334155;'>หมวดหมู่: {cat.title()}</h4>", unsafe_allow_html=True)
                     shop_cols = st.columns(3)
-                    idx = 0
-                    for cat, items in suggestions.items():
-                        for item in items[:2]:
-                            with shop_cols[idx % 3]:
-                                st.markdown(f"""
-                                <div class="product-card">
-                                    <div class="product-name">🛋️ {item['name']}</div>
-                                    <div class="product-price">฿{item['price']:,}</div>
-                                    <div class="product-store">📍 {item['store']}</div>
-                                </div>
-                                """, unsafe_allow_html=True)
-                                st.link_button("👉 สั่งซื้อสินค้านี้", item['link'], use_container_width=True)
-                            idx += 1
-                else:
-                    st.info("ℹ️ ไม่พบสินค้าที่ตรงกับฐานข้อมูลในขณะนี้")
+                    for idx, item in enumerate(items[:3]):
+                        with shop_cols[idx % 3]:
+                            st.markdown(f"""
+                            <div class="product-card">
+                                <div class="product-name">{item['name']}</div>
+                                <div class="product-price">฿{item['price']:,}</div>
+                                <div class="product-store">📍 {item['store']}</div>
+                                <div style='margin-top:8px;'><a href='{item['link']}' target='_blank' style='text-decoration:none; color:#4F46E5; font-weight:700;'>👉 ดูสินค้า / สั่งซื้อ</a></div>
+                            </div>
+                            """, unsafe_allow_html=True)
+            else:
+                st.warning("⚠️ ไม่พบสินค้าที่ตรงกับฐานข้อมูลในขณะนี้ ลองสแกนอีกรอบหรือลองเปลี่ยนภาพ")
+        else:
+            st.markdown("<p style='color:#64748B;'>กดปุ่มด้านบนเพื่อให้ AI วิเคราะห์ภาพและแสดงลิงก์สินค้า</p>", unsafe_allow_html=True)
     else:
         st.info("👋 ยินดีต้อนรับ! กรุณาตั้งค่าห้องที่แผงควบคุมด้านซ้าย แล้วกดปุ่ม **'เนรมิตห้องในฝัน'** เพื่อเริ่มต้นครับ")
         st.markdown('<div style="text-align:center; padding: 50px; background:#F8FAFC; border-radius:15px; border:2px dashed #CBD5E1;"><h1 style="font-size:4rem; margin:0;">🛋️</h1><p style="color:#94A3B8; font-size:1.2rem;">พื้นที่แสดงผล (Canvas)</p></div>', unsafe_allow_html=True)
